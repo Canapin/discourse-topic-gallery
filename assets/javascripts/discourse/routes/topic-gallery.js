@@ -3,9 +3,9 @@ import DiscourseRoute from "discourse/routes/discourse";
 
 export default class TopicGalleryRoute extends DiscourseRoute {
   queryParams = {
-    username: { refreshModel: true },
-    from_date: { refreshModel: true },
-    to_date: { refreshModel: true },
+    username: { refreshModel: true, replace: true },
+    from_date: { refreshModel: true, replace: true },
+    to_date: { refreshModel: true, replace: true },
   };
 
   async model(params) {

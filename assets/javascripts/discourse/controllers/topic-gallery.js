@@ -1,9 +1,12 @@
 import { tracked } from "@glimmer/tracking";
 import Controller from "@ember/controller";
 import { action } from "@ember/object";
+import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
 
 export default class TopicGalleryController extends Controller {
+  @service router;
+
   @tracked images = [];
   @tracked hasMore = false;
   @tracked isLoading = false;
@@ -59,6 +62,12 @@ export default class TopicGalleryController extends Controller {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  @action
+  navigateToTopic(event) {
+    event.preventDefault();
+    this.router.transitionTo(event.currentTarget.getAttribute("href"));
   }
 
   @action

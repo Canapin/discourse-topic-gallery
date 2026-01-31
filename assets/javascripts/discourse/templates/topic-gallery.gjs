@@ -1,4 +1,5 @@
 import { hash } from "@ember/helper";
+import { on } from "@ember/modifier";
 import DatePicker from "discourse/components/date-picker";
 import icon from "discourse/helpers/d-icon";
 import EmailGroupUserChooser from "discourse/select-kit/components/email-group-user-chooser";
@@ -12,6 +13,7 @@ import TopicGalleryGrid from "../components/topic-gallery-grid";
         <a
           href="/t/{{@model.slug}}/{{@model.id}}"
           class="topic-back-link"
+          {{on "click" @controller.navigateToTopic}}
         >{{icon "chevron-left"}}{{@model.title}}</a>
       </h1>
       <span class="image-count-badge">
