@@ -152,12 +152,13 @@
         text-decoration: none;
       }
 
-      .gallery-author {
-        font-weight: 500;
-      }
-
       .gallery-post-link {
-        color: var(--tertiary);
+        color: var(--primary-medium);
+
+        &:hover,
+        &:focus {
+          color: var(--primary-very-high);
+        }
       }
     }
 

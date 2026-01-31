@@ -101,7 +101,10 @@ export default class TopicGalleryGrid extends Component {
     };
 
     const onClick = (e) => {
-      const link = e.target.closest("a.gallery-post-link, a.gallery-author");
+      if (e.target.closest("[data-user-card]")) {
+        return;
+      }
+      const link = e.target.closest("a.gallery-post-link");
       if (!link) {
         return;
       }
@@ -157,7 +160,8 @@ export default class TopicGalleryGrid extends Component {
               <div class="gallery-meta">
                 <a
                   href="/u/{{image.username}}"
-                  class="gallery-author"
+                  data-user-card={{image.username}}
+                  class="mention"
                 >@{{image.username}}</a>
                 &nbsp;-&nbsp;
                 <a
