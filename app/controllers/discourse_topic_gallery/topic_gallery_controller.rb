@@ -7,6 +7,10 @@ module DiscourseTopicGallery
     PAGE_SIZE = 30
 
     def show
+      unless current_user&.in_any_groups?(SiteSetting.topic_gallery_allowed_groups_map)
+        raise Discourse::InvalidAccess
+      end
+
       topic = Topic.find_by(id: params[:topic_id])
       raise Discourse::NotFound unless topic
       guardian.ensure_can_see!(topic)

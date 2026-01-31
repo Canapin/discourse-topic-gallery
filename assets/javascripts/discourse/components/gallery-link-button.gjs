@@ -4,6 +4,7 @@ import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
 
 export default class GalleryLinkButton extends Component {
+  @service currentUser;
   @service router;
 
   @action
@@ -14,11 +15,13 @@ export default class GalleryLinkButton extends Component {
   }
 
   <template>
-    <DButton
-      @action={{this.openGallery}}
-      @icon="images"
-      @title="discourse_topic_gallery.gallery_button_title"
-      class="btn-default gallery-link-btn"
-    />
+    {{#if this.currentUser.can_view_topic_gallery}}
+      <DButton
+        @action={{this.openGallery}}
+        @icon="images"
+        @title="discourse_topic_gallery.gallery_button_title"
+        class="btn-default gallery-link-btn"
+      />
+    {{/if}}
   </template>
 }

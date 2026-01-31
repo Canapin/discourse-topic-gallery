@@ -2,3 +2,9 @@ plugins:
   topic_gallery_enabled:
     default: true
     client: false
+  topic_gallery_allowed_groups:
+    type: group_list
+    list_type: compact
+    default: "0|1|2|3"
+    allow_any: false
+    refresh: true

@@ -2,7 +2,7 @@ import { hash } from "@ember/helper";
 import { on } from "@ember/modifier";
 import DatePicker from "discourse/components/date-picker";
 import icon from "discourse/helpers/d-icon";
-import EmailGroupUserChooser from "discourse/select-kit/components/email-group-user-chooser";
+import UserChooser from "discourse/select-kit/components/email-group-user-chooser";
 import { i18n } from "discourse-i18n";
 import TopicGalleryGrid from "../components/topic-gallery-grid";
 
@@ -24,7 +24,7 @@ import TopicGalleryGrid from "../components/topic-gallery-grid";
     <div class="admin-controls">
       <div class="control-unit">
         <label>{{i18n "discourse_topic_gallery.filter_by_user"}}</label>
-        <EmailGroupUserChooser
+        <UserChooser
           @value={{@controller.username}}
           @onChange={{@controller.updateUsername}}
           @options={{hash

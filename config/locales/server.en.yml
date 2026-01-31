@@ -1,1 +1,4 @@
 en:
+  site_settings:
+    topic_gallery_enabled: "Enable the topic gallery plugin."
+    topic_gallery_allowed_groups: "Groups that are allowed to access the topic gallery."

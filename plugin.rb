@@ -18,13 +18,17 @@ end
 
 after_initialize do
   require_dependency File.expand_path(
-    "../app/controllers/discourse_topic_gallery/topic_gallery_controller.rb",
-    __FILE__,
-  )
+                       "../app/controllers/discourse_topic_gallery/topic_gallery_controller.rb",
+                       __FILE__,
+                     )
 
   Discourse::Application.routes.prepend do
     get "t/:slug/:topic_id/gallery" => "topics#show", :constraints => { topic_id: /\d+/ }
     get "t/:topic_id/gallery" => "topics#show", :constraints => { topic_id: /\d+/ }
+  end
+
+  add_to_serializer(:current_user, :can_view_topic_gallery) do
+    object.in_any_groups?(SiteSetting.topic_gallery_allowed_groups_map)
   end
 
   Discourse::Application.routes.append do
