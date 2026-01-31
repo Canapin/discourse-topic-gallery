@@ -9,7 +9,9 @@ export default class TopicGalleryController extends Controller {
   @tracked isLoading = false;
   @tracked total = 0;
   @tracked username = null;
-  queryParams = ["username"];
+  @tracked from_date = null;
+  @tracked to_date = null;
+  queryParams = ["username", "from_date", "to_date"];
 
   page = 0;
   topicId = null;
@@ -22,6 +24,24 @@ export default class TopicGalleryController extends Controller {
     this.topicId = model.id;
   }
 
+  buildUrl(page) {
+    const params = new URLSearchParams();
+    if (page > 0) {
+      params.set("page", page);
+    }
+    if (this.username) {
+      params.set("username", this.username);
+    }
+    if (this.from_date) {
+      params.set("from_date", this.from_date);
+    }
+    if (this.to_date) {
+      params.set("to_date", this.to_date);
+    }
+    const qs = params.toString();
+    return `/topic-gallery/${this.topicId}${qs ? `?${qs}` : ""}`;
+  }
+
   @action
   async loadMore() {
     if (this.isLoading || !this.hasMore) {
@@ -31,12 +51,7 @@ export default class TopicGalleryController extends Controller {
     this.isLoading = true;
 
     try {
-      const nextPage = this.page + 1;
-      let url = `/topic-gallery/${this.topicId}?page=${nextPage}`;
-      if (this.username) {
-        url += `&username=${encodeURIComponent(this.username)}`;
-      }
-      const result = await ajax(url);
+      const result = await ajax(this.buildUrl(this.page + 1));
       this.images = [...this.images, ...result.images];
       this.hasMore = result.hasMore;
       this.page = result.page;
@@ -50,5 +65,15 @@ export default class TopicGalleryController extends Controller {
   updateUsername(val) {
     const selected = Array.isArray(val) ? val[0] : val;
     this.username = selected || null;
+  }
+
+  @action
+  updateFromDate(date) {
+    this.from_date = date || null;
+  }
+
+  @action
+  updateToDate(date) {
+    this.to_date = date || null;
   }
 }

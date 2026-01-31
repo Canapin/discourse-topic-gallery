@@ -7,5 +7,7 @@ en:
   js:
     discourse_topic_gallery:
       images: "images"
-      filter_by_user: "Filter by user:"
+      filter_by_user: "User:"
       user_placeholder: "Search for a user..."
+      from_date: "From:"
+      to_date: "To:"

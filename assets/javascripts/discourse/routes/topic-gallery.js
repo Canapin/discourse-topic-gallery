@@ -4,14 +4,23 @@ import DiscourseRoute from "discourse/routes/discourse";
 export default class TopicGalleryRoute extends DiscourseRoute {
   queryParams = {
     username: { refreshModel: true },
+    from_date: { refreshModel: true },
+    to_date: { refreshModel: true },
   };
 
   async model(params) {
-    let url = `/topic-gallery/${params.id}`;
+    const qp = new URLSearchParams();
     if (params.username) {
-      url += `?username=${encodeURIComponent(params.username)}`;
+      qp.set("username", params.username);
     }
-    return await ajax(url);
+    if (params.from_date) {
+      qp.set("from_date", params.from_date);
+    }
+    if (params.to_date) {
+      qp.set("to_date", params.to_date);
+    }
+    const qs = qp.toString();
+    return await ajax(`/topic-gallery/${params.id}${qs ? `?${qs}` : ""}`);
   }
 
   setupController(controller, model) {

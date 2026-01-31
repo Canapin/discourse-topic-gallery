@@ -19,6 +19,16 @@ module DiscourseTopicGallery
         visible_posts = visible_posts.where(user_id: filter_user.id) if filter_user
       end
 
+      if params[:from_date].present?
+        from = Date.parse(params[:from_date]) rescue nil
+        visible_posts = visible_posts.where("posts.created_at >= ?", from.beginning_of_day) if from
+      end
+
+      if params[:to_date].present?
+        to = Date.parse(params[:to_date]) rescue nil
+        visible_posts = visible_posts.where("posts.created_at <= ?", to.end_of_day) if to
+      end
+
       visible_post_ids = visible_posts.pluck(:id).to_set
 
       all_uploads =
