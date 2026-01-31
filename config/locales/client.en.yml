@@ -3,7 +3,9 @@ en:
     admin:
       site_settings:
         categories:
-          TODO_plugin_name: "Plugin Name"
+          discourse_topic_gallery: "Topic Gallery"
   js:
-    discourse_plugin_name:
-      placeholder: placeholder
+    discourse_topic_gallery:
+      images: "images"
+      filter_by_user: "Filter by user:"
+      user_placeholder: "Search for a user..."

@@ -4,26 +4,50 @@ module DiscourseTopicGallery
   class TopicGalleryController < ::ApplicationController
     requires_plugin PLUGIN_NAME
 
+    PAGE_SIZE = 30
+
     def show
       topic = Topic.find_by(id: params[:topic_id])
       raise Discourse::NotFound unless topic
       guardian.ensure_can_see!(topic)
 
+      page = [params[:page].to_i, 0].max
       visible_posts = visible_posts_scope(topic)
+
+      if params[:username].present?
+        filter_user = User.find_by_username(params[:username])
+        visible_posts = visible_posts.where(user_id: filter_user.id) if filter_user
+      end
+
       visible_post_ids = visible_posts.pluck(:id).to_set
 
-      uploads =
+      all_uploads =
         Upload
           .joins(:posts)
           .where(posts: { id: visible_post_ids })
           .where("uploads.width IS NOT NULL AND uploads.height IS NOT NULL")
-          .includes(:user, :optimized_images, :posts)
           .distinct
+
+      total = all_uploads.count
+
+      uploads =
+        all_uploads
+          .includes(:user, :optimized_images, :posts)
           .order("posts.post_number ASC")
+          .offset(page * PAGE_SIZE)
+          .limit(PAGE_SIZE)
 
       images = serialize_uploads(uploads.to_a, topic, visible_post_ids)
 
-      render json: { title: topic.title, slug: topic.slug, id: topic.id, images: images }
+      render json: {
+               title: topic.title,
+               slug: topic.slug,
+               id: topic.id,
+               images: images,
+               page: page,
+               hasMore: ((page + 1) * PAGE_SIZE) < total,
+               total: total,
+             }
     end
 
     private

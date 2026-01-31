@@ -20,6 +20,27 @@
       margin: 0;
     }
   }
+
+  .topic-gallery-filters {
+    margin-bottom: 1.5rem;
+    padding: 0 10px;
+
+    .gallery-user-filter {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      label {
+        font-size: var(--font-down-1);
+        color: var(--primary-medium);
+        white-space: nowrap;
+      }
+
+      .email-group-user-chooser {
+        min-width: 250px;
+      }
+    }
+  }
 }
 
 .topic-gallery-container {
@@ -89,6 +110,12 @@
         color: var(--tertiary-medium);
       }
     }
+  }
+
+  .gallery-loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--primary-medium);
   }
 
   .no-images-message {

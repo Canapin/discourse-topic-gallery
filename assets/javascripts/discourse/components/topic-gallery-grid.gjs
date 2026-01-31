@@ -2,8 +2,29 @@ import Component from "@glimmer/component";
 import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
+import { modifier } from "ember-modifier";
 
 export default class TopicGalleryGrid extends Component {
+  observer = null;
+
+  sentinel = modifier((element) => {
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          this.args.loadMore?.();
+        }
+      },
+      { rootMargin: "300px" }
+    );
+
+    this.observer.observe(element);
+
+    return () => {
+      this.observer?.disconnect();
+      this.observer = null;
+    };
+  });
+
   @action
   openLightbox(image, event) {
     event.preventDefault();
@@ -43,6 +64,14 @@ export default class TopicGalleryGrid extends Component {
             </div>
           {{/each}}
         </div>
+
+        {{#if @hasMore}}
+          <div class="gallery-sentinel" {{this.sentinel}}>
+            {{#if @isLoading}}
+              <div class="gallery-loading">Loading...</div>
+            {{/if}}
+          </div>
+        {{/if}}
       {{else}}
         <div class="no-images-message">
           <p>No images found in this topic.</p>
