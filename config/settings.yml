@@ -5,6 +5,6 @@ plugins:
   topic_gallery_allowed_groups:
     type: group_list
     list_type: compact
-    default: "0|1|2|3"
+    default: "0"
     allow_any: false
     refresh: true
