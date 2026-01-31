@@ -1,6 +1,7 @@
 import Component from "@glimmer/component";
 import { service } from "@ember/service";
 import { modifier } from "ember-modifier";
+import ConditionalLoadingSpinner from "discourse/components/conditional-loading-spinner";
 import lightbox from "discourse/lib/lightbox";
 import DiscourseURL from "discourse/lib/url";
 import { i18n } from "discourse-i18n";
@@ -176,9 +177,7 @@ export default class TopicGalleryGrid extends Component {
 
         {{#if @hasMore}}
           <div class="gallery-sentinel" {{this.sentinel}}>
-            {{#if @isLoading}}
-              <div class="gallery-loading">Loading...</div>
-            {{/if}}
+            <ConditionalLoadingSpinner @condition={{@isLoading}} />
           </div>
         {{/if}}
       {{else}}
