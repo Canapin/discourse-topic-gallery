@@ -94,13 +94,20 @@ module DiscourseTopicGallery
     def serialize_uploads(uploads, topic, visible_post_ids)
       uploads.map do |upload|
         post = upload.posts.find { |p| p.topic_id == topic.id && visible_post_ids.include?(p.id) }
-        optimized = OptimizedImage.create_for(upload, 400, 400)
+        thumb_w = upload.thumbnail_width || upload.width
+        thumb_h = upload.thumbnail_height || upload.height
+        optimized = OptimizedImage.create_for(upload, thumb_w, thumb_h)
         thumbnail_raw_url = optimized&.url || upload.url
 
         {
           id: upload.id,
           thumbnailUrl: UrlHelper.cook_url(thumbnail_raw_url, secure: upload.secure?, local: true),
           url: UrlHelper.cook_url(upload.url, secure: upload.secure?, local: true),
+          width: upload.width,
+          height: upload.height,
+          filesize: upload.human_filesize,
+          filename: upload.original_filename,
+          downloadUrl: upload.short_path,
           username: upload.user&.username,
           postId: post&.id,
           postNumber: post&.post_number,
