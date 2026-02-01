@@ -63,6 +63,14 @@
         display: block;
         color: var(--primary-high);
       }
+
+      .user-chooser {
+        width: 100% !important;
+
+        @media screen and (width >= 768px) {
+          min-width: 300px;
+        }
+      }
     }
   }
 }
