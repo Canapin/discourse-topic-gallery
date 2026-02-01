@@ -11,10 +11,10 @@ export default class TopicGalleryController extends Controller {
   @tracked hasMore = false;
   @tracked isLoading = false;
   @tracked total = 0;
-  @tracked username = null;
-  @tracked from_date = null;
-  @tracked to_date = null;
-  @tracked post_number = null;
+  @tracked username = "";
+  @tracked from_date = "";
+  @tracked to_date = "";
+  @tracked post_number = "";
   @tracked filtersVisible = false;
   queryParams = ["username", "from_date", "to_date", "post_number"];
 
@@ -89,10 +89,10 @@ export default class TopicGalleryController extends Controller {
 
   @action
   clearFilters() {
-    this.username = null;
-    this.from_date = null;
-    this.to_date = null;
-    this.post_number = null;
+    this.username = "";
+    this.from_date = "";
+    this.to_date = "";
+    this.post_number = "";
     this.fetchImages();
   }
 
@@ -110,19 +110,19 @@ export default class TopicGalleryController extends Controller {
   @action
   updateUsername(val) {
     const selected = Array.isArray(val) ? val[0] : val;
-    this.username = selected || null;
+    this.username = selected || "";
     this.fetchImages();
   }
 
   @action
   updateFromDate(date) {
-    this.from_date = date || null;
+    this.from_date = date || "";
     this.fetchImages();
   }
 
   @action
   updateToDate(date) {
-    this.to_date = date || null;
+    this.to_date = date || "";
     this.fetchImages();
   }
 }

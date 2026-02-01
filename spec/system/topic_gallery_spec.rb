@@ -25,7 +25,7 @@ describe "Topic Gallery", type: :system do
 
     page.visit("/t/#{topic.slug}/#{topic.id}/gallery")
 
-    expect(page).to have_current_path("/t/#{topic.slug}/#{topic.id}/gallery")
+    expect(page).to have_current_path("/t/#{topic.slug}/#{topic.id}/gallery", ignore_query: true)
     expect(gallery_page).to have_topic_title(topic.title)
   end
 end

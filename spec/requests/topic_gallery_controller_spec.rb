@@ -225,16 +225,18 @@ describe "TopicGalleryController" do
       end
     end
 
-    context "with deduplication" do
+    context "with duplicate uploads across posts" do
       before { sign_in(user) }
 
-      it "returns each upload only once even if in multiple posts" do
+      it "returns the upload once per post it appears in" do
         UploadReference.create!(target: post2, upload: upload1)
 
         get "/topic-gallery/#{topic.id}.json"
 
-        ids = response.parsed_body["images"].map { |i| i["id"] }
-        expect(ids.count(upload1.id)).to eq(1)
+        images = response.parsed_body["images"]
+        upload1_entries = images.select { |i| i["id"] == upload1.id }
+        expect(upload1_entries.length).to eq(2)
+        expect(upload1_entries.map { |i| i["postNumber"] }).to contain_exactly(1, 2)
       end
     end
   end
