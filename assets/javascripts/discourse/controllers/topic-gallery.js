@@ -108,6 +108,12 @@ export default class TopicGalleryController extends Controller {
   }
 
   @action
+  clearPostNumber() {
+    this.post_number = "";
+    this.fetchImages();
+  }
+
+  @action
   updateUsername(val) {
     const selected = Array.isArray(val) ? val[0] : val;
     this.username = selected || "";
