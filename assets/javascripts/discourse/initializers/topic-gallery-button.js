@@ -29,14 +29,17 @@ export default {
         },
       });
 
-      api.registerValueTransformer(
-        "post-menu-buttons",
-        ({ value: dag, context: { buttonKeys } }) => {
-          dag.add("gallery", PostMenuGalleryButton, {
-            before: buttonKeys.SHOW_MORE,
-          });
-        }
-      );
+      const siteSettings = api.container.lookup("service:site-settings");
+      if (siteSettings.topic_gallery_post_menu_button) {
+        api.registerValueTransformer(
+          "post-menu-buttons",
+          ({ value: dag, context: { buttonKeys } }) => {
+            dag.add("gallery", PostMenuGalleryButton, {
+              before: buttonKeys.SHOW_MORE,
+            });
+          }
+        );
+      }
     });
   },
 };
