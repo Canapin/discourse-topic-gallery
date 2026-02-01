@@ -187,7 +187,15 @@ describe "TopicGalleryController" do
     end
 
     context "with access controls" do
-      it "returns 403 for anonymous users" do
+      it "allows anonymous users when everyone group is allowed" do
+        get "/topic-gallery/#{topic.id}.json"
+        expect(response.status).to eq(200)
+      end
+
+      it "returns 403 for anonymous users when restricted to a specific group" do
+        group = Fabricate(:group)
+        SiteSetting.topic_gallery_allowed_groups = group.id.to_s
+
         get "/topic-gallery/#{topic.id}.json"
         expect(response.status).to eq(403)
       end

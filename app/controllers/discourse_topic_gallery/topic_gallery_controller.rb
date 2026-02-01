@@ -7,7 +7,9 @@ module DiscourseTopicGallery
     PAGE_SIZE = 30
 
     def show
-      unless current_user&.in_any_groups?(SiteSetting.topic_gallery_allowed_groups_map)
+      allowed_groups = SiteSetting.topic_gallery_allowed_groups_map
+      everyone_allowed = allowed_groups.include?(Group::AUTO_GROUPS[:everyone])
+      unless everyone_allowed || current_user&.in_any_groups?(allowed_groups)
         raise Discourse::InvalidAccess
       end
 
