@@ -8,3 +8,6 @@ plugins:
     default: "1" # admin group
     allow_any: false
     refresh: true
+  topic_gallery_post_menu_button:
+    default: true
+    client: true
