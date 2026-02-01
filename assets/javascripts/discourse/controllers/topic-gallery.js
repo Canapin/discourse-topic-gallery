@@ -45,6 +45,20 @@ export default class TopicGalleryController extends Controller {
     return `/topic-gallery/${this.topicId}${qs ? `?${qs}` : ""}`;
   }
 
+  async fetchImages() {
+    this.isLoading = true;
+
+    try {
+      const result = await ajax(this.buildUrl(0));
+      this.images = result.images;
+      this.hasMore = result.hasMore;
+      this.page = result.page;
+      this.total = result.total;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
   @action
   async loadMore() {
     if (this.isLoading || !this.hasMore) {
@@ -73,6 +87,7 @@ export default class TopicGalleryController extends Controller {
     this.username = null;
     this.from_date = null;
     this.to_date = null;
+    this.fetchImages();
   }
 
   @action
@@ -85,15 +100,18 @@ export default class TopicGalleryController extends Controller {
   updateUsername(val) {
     const selected = Array.isArray(val) ? val[0] : val;
     this.username = selected || null;
+    this.fetchImages();
   }
 
   @action
   updateFromDate(date) {
     this.from_date = date || null;
+    this.fetchImages();
   }
 
   @action
   updateToDate(date) {
     this.to_date = date || null;
+    this.fetchImages();
   }
 }
