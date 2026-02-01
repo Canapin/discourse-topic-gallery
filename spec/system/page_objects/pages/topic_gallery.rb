@@ -9,11 +9,11 @@ module PageObjects
       end
 
       def has_topic_title?(text)
-        has_css?(".topic-gallery h1", text: text)
+        has_css?(".topic-gallery-page h1", text: text)
       end
 
       def has_gallery_container?
-        has_css?(".topic-gallery")
+        has_css?(".topic-gallery-page")
       end
     end
   end

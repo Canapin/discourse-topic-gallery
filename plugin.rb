@@ -13,7 +13,7 @@ enabled_site_setting :topic_gallery_enabled
 register_asset "stylesheets/topic-gallery.scss"
 
 module ::DiscourseTopicGallery
-  PLUGIN_NAME = "discourse_topic_gallery"
+  PLUGIN_NAME = "discourse-topic-gallery"
 end
 
 after_initialize do
