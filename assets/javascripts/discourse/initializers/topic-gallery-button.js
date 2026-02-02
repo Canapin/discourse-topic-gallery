@@ -22,7 +22,7 @@ function galleryButtonConfig(anonymousOnly) {
       return this.site.mobileView;
     },
     displayed() {
-      return this.site.can_view_topic_gallery;
+      return !this.site.mobileView && this.site.can_view_topic_gallery;
     },
   };
 }

@@ -1,5 +1,15 @@
 @use "lib/viewport";
 
+#topic-progress-wrapper {
+  & > span:first-child {
+    display: flex; // smol hack on an annoying automatically generated span that messes up with the button's height. Might impact other theme components or plugins!
+  }
+
+  .gallery-progress-btn {
+    border-radius: 0;
+  }
+}
+
 .topic-gallery-page {
   max-width: 1400px;
   margin: 0 auto;
