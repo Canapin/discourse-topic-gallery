@@ -34,6 +34,15 @@ after_initialize do
     object.in_any_groups?(SiteSetting.topic_gallery_allowed_groups_map)
   end
 
+  add_to_serializer(:site, :can_view_topic_gallery) do
+    allowed = SiteSetting.topic_gallery_allowed_groups_map
+    if scope.user
+      scope.user.in_any_groups?(allowed)
+    else
+      allowed.include?(Group::AUTO_GROUPS[:everyone])
+    end
+  end
+
   Discourse::Application.routes.append do
     scope constraints: { topic_id: /\d+/ } do
       get "/topic-gallery/:topic_id" => "discourse_topic_gallery/topic_gallery#show"

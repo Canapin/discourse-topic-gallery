@@ -5,6 +5,7 @@ import DButton from "discourse/components/d-button";
 
 export default class PostMenuGalleryButton extends Component {
   @service router;
+  @service site;
 
   @action
   openGallery() {
@@ -17,13 +18,15 @@ export default class PostMenuGalleryButton extends Component {
   }
 
   <template>
-    <DButton
-      class="post-action-menu__gallery gallery"
-      ...attributes
-      @action={{this.openGallery}}
-      @icon="images"
-      @label={{if @showLabel "discourse_topic_gallery.gallery_button_label"}}
-      @title="discourse_topic_gallery.gallery_button_title"
-    />
+    {{#if this.site.can_view_topic_gallery}}
+      <DButton
+        class="post-action-menu__gallery gallery"
+        ...attributes
+        @action={{this.openGallery}}
+        @icon="images"
+        @label={{if @showLabel "discourse_topic_gallery.gallery_button_label"}}
+        @title="discourse_topic_gallery.gallery_button_title"
+      />
+    {{/if}}
   </template>
 }

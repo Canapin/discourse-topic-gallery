@@ -4,7 +4,7 @@ import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
 
 export default class GalleryTimelineButton extends Component {
-  @service currentUser;
+  @service site;
   @service router;
 
   @action
@@ -14,7 +14,7 @@ export default class GalleryTimelineButton extends Component {
   }
 
   <template>
-    {{#if this.currentUser.can_view_topic_gallery}}
+    {{#if this.site.can_view_topic_gallery}}
       <DButton
         @action={{this.openGallery}}
         @icon="images"
