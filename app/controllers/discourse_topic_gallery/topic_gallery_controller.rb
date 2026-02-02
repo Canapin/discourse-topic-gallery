@@ -62,8 +62,8 @@ module DiscourseTopicGallery
         )
       SQL
 
-      # Get upload references ordered by post appearance then position within the post
-      ordered_refs =
+      # Single query: fetch paginated refs with total via window function
+      refs_with_total =
         UploadReference
           .joins("INNER JOIN posts ON posts.id = upload_references.target_id")
           .joins("INNER JOIN uploads ON uploads.id = upload_references.upload_id")
@@ -76,27 +76,14 @@ module DiscourseTopicGallery
             "upload_references.id AS ref_id",
             "posts.id AS post_id",
             "posts.post_number",
+            "COUNT(*) OVER() AS total_count",
           )
           .order("posts.post_number ASC, upload_references.id ASC")
-
-      total =
-        UploadReference
-          .joins("INNER JOIN posts ON posts.id = upload_references.target_id")
-          .joins("INNER JOIN uploads ON uploads.id = upload_references.upload_id")
-          .where(target_type: "Post", target_id: visible_posts_sub)
-          .where.not(uploads: { width: nil })
-          .where.not(uploads: { height: nil })
-          .where(non_content_exclusion)
-          .count
-
-      paginated_refs =
-        UploadReference
-          .from(ordered_refs, :refs)
-          .select("refs.upload_id", "refs.ref_id", "refs.post_id", "refs.post_number")
           .offset(page * PAGE_SIZE)
           .limit(PAGE_SIZE)
 
-      refs_array = paginated_refs.to_a
+      refs_array = refs_with_total.to_a
+      total = refs_array.first&.total_count.to_i
       upload_ids = refs_array.map(&:upload_id)
 
       uploads = Upload.where(id: upload_ids).includes(:user, :optimized_images).index_by(&:id)
@@ -129,7 +116,7 @@ module DiscourseTopicGallery
 
       if current_user
         ignored_ids = IgnoredUser.where(user_id: current_user.id).select(:ignored_user_id)
-        scope = scope.where.not(user_id: ignored_ids) if ignored_ids.exists?
+        scope = scope.where.not(user_id: ignored_ids)
       end
 
       scope
@@ -143,7 +130,14 @@ module DiscourseTopicGallery
 
           thumb_w = upload.thumbnail_width || upload.width
           thumb_h = upload.thumbnail_height || upload.height
-          optimized = OptimizedImage.create_for(upload, thumb_w, thumb_h)
+          ext = ".#{upload.extension}"
+
+          # Use preloaded optimized_images to avoid per-row queries
+          optimized =
+            upload.optimized_images.detect do |oi|
+              oi.width == thumb_w && oi.height == thumb_h && oi.extension == ext
+            end
+          optimized ||= OptimizedImage.create_for(upload, thumb_w, thumb_h)
           thumbnail_raw_url = optimized&.url || upload.url
 
           {
