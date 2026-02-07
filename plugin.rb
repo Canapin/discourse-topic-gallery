@@ -2,7 +2,7 @@
 
 # name: discourse-topic-gallery
 # about: Adds a gallery view to topics.
-# meta_topic_id: TODO
+# meta_topic_id: 394953
 # version: 0.0.1
 # authors: Canapin & AI
 # url: https://github.com/Canapin/discourse-topic-gallery
