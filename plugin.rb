@@ -28,15 +28,13 @@ after_initialize do
   Discourse::Application.routes.prepend do
     constraints(->(req) { !req.path.end_with?(".json") }) do
       get "t/:slug/:topic_id/gallery" => "topics#show", :constraints => { topic_id: /\d+/ }
+      # Currently not working. Discourse catches the topic URL before the gallery
+      # and redirects to the topic normal view.
       get "t/:topic_id/gallery" => "topics#show", :constraints => { topic_id: /\d+/ }
     end
   end
 
   # Expose gallery permission to the client so the UI can show/hide the button
-  add_to_serializer(:current_user, :can_view_topic_gallery) do
-    object.in_any_groups?(SiteSetting.topic_gallery_allowed_groups_map)
-  end
-
   add_to_serializer(:site, :can_view_topic_gallery) do
     allowed = SiteSetting.topic_gallery_allowed_groups_map
     if scope.user
@@ -51,6 +49,8 @@ after_initialize do
     scope constraints: { topic_id: /\d+/ } do
       get "/topic-gallery/:topic_id" => "discourse_topic_gallery/topic_gallery#show"
       get "t/:slug/:topic_id/gallery" => "discourse_topic_gallery/topic_gallery#show"
+      # Currenty not working. Discourse catches the topic URL before the gallery
+      # and redirects to the topic normal view.
       get "t/:topic_id/gallery" => "discourse_topic_gallery/topic_gallery#show"
     end
   end
