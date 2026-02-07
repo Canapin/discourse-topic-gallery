@@ -13,8 +13,9 @@ export default class PostMenuGalleryButton extends Component {
     const post = this.args.post;
     const topic = post.topic;
 
+    const qp = post.post_number > 1 ? { post_number: post.post_number } : {};
     this.router.transitionTo("topicGallery", topic.slug, topic.id, {
-      queryParams: { post_number: post.post_number },
+      queryParams: qp,
     });
   }
 
