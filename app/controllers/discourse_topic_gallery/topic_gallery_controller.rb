@@ -92,6 +92,7 @@ module DiscourseTopicGallery
             "upload_references.id AS ref_id",
             "posts.id AS post_id",
             "posts.post_number",
+            "posts.user_id AS post_user_id",
             "COUNT(*) OVER() AS total_count",
           )
           .order("posts.post_number ASC, upload_references.id ASC")
@@ -102,10 +103,12 @@ module DiscourseTopicGallery
       total = refs_array.first&.total_count.to_i
       upload_ids = refs_array.map(&:upload_id)
 
-      # Eager-load users and optimized images to avoid N+1 queries during serialization
-      uploads = Upload.where(id: upload_ids).includes(:user, :optimized_images).index_by(&:id)
+      # Eager-load optimized images to avoid N+1 queries during serialization
+      uploads = Upload.where(id: upload_ids).includes(:optimized_images).index_by(&:id)
+      post_user_ids = refs_array.map(&:post_user_id).uniq
+      post_users = User.where(id: post_user_ids).index_by(&:id)
 
-      images = serialize_uploads_from_refs(refs_array, uploads, topic)
+      images = serialize_uploads_from_refs(refs_array, uploads, post_users, topic)
 
       render json: {
                title: topic.title,
@@ -144,7 +147,7 @@ module DiscourseTopicGallery
     # Builds the JSON array for each image. Reuses existing optimized thumbnails
     # when available (via the preloaded association); falls back to create_for
     # which is itself a find-or-create (no duplicate work).
-    def serialize_uploads_from_refs(refs, uploads, topic)
+    def serialize_uploads_from_refs(refs, uploads, post_users, topic)
       refs
         .map do |ref|
           upload = uploads[ref.upload_id]
@@ -171,7 +174,7 @@ module DiscourseTopicGallery
             filesize: upload.human_filesize,
             filename: upload.original_filename,
             downloadUrl: upload.short_path,
-            username: upload.user&.username,
+            username: post_users[ref.post_user_id]&.username,
             postId: ref.post_id,
             postNumber: ref.post_number,
             postUrl: "/t/#{topic.slug}/#{topic.id}/#{ref.post_number}",
