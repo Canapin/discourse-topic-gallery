@@ -3,6 +3,7 @@ import { action } from "@ember/object";
 import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
 
+// Gallery button at the bottom of the topic timeline (desktop sidebar)
 export default class GalleryTimelineButton extends Component {
   @service site;
   @service router;

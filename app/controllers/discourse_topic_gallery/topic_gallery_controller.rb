@@ -6,7 +6,10 @@ module DiscourseTopicGallery
 
     PAGE_SIZE = 30
 
+    # Main endpoint — returns a paginated JSON list of images for a given topic.
+    # Supports optional filters: username, post_number, from_date, to_date.
     def show
+      # --- Access control ---
       allowed_groups = SiteSetting.topic_gallery_allowed_groups_map
       everyone_allowed = allowed_groups.include?(Group::AUTO_GROUPS[:everyone])
       unless everyone_allowed || current_user&.in_any_groups?(allowed_groups)
@@ -17,6 +20,7 @@ module DiscourseTopicGallery
       raise Discourse::NotFound unless topic
       guardian.ensure_can_see!(topic)
 
+      # --- Optional filters (all additive) ---
       page = [params[:page].to_i, 0].max
       visible_posts = visible_posts_scope(topic)
 
@@ -62,7 +66,9 @@ module DiscourseTopicGallery
         )
       SQL
 
-      # Single query: fetch paginated refs with total via window function
+      # --- Main query ---
+      # Joins uploads → posts, applies all filters, and uses a window function
+      # (COUNT(*) OVER()) to get the total count without a separate query.
       refs_with_total =
         UploadReference
           .joins("INNER JOIN posts ON posts.id = upload_references.target_id")
@@ -88,6 +94,7 @@ module DiscourseTopicGallery
       total = refs_array.first&.total_count.to_i
       upload_ids = refs_array.map(&:upload_id)
 
+      # Eager-load users and optimized images to avoid N+1 queries during serialization
       uploads = Upload.where(id: upload_ids).includes(:user, :optimized_images).index_by(&:id)
 
       images = serialize_uploads_from_refs(refs_array, uploads, topic)
@@ -105,6 +112,8 @@ module DiscourseTopicGallery
 
     private
 
+    # Scopes posts to only those the current user is allowed to see:
+    # excludes deleted, hidden, non-regular types, and posts from ignored users.
     def visible_posts_scope(topic)
       allowed_types = [Post.types[:regular]]
       allowed_types << Post.types[:whisper] if guardian.can_see_whispers?
@@ -124,6 +133,9 @@ module DiscourseTopicGallery
       scope
     end
 
+    # Builds the JSON array for each image. Reuses existing optimized thumbnails
+    # when available (via the preloaded association); falls back to create_for
+    # which is itself a find-or-create (no duplicate work).
     def serialize_uploads_from_refs(refs, uploads, topic)
       refs
         .map do |ref|
@@ -134,7 +146,6 @@ module DiscourseTopicGallery
           thumb_h = upload.thumbnail_height || upload.height
           ext = ".#{upload.extension}"
 
-          # Use preloaded optimized_images to avoid per-row queries
           optimized =
             upload.optimized_images.detect do |oi|
               oi.width == thumb_w && oi.height == thumb_h && oi.extension == ext

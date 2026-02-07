@@ -4,6 +4,8 @@ import PostMenuGalleryButton from "../components/post-menu-gallery-button";
 
 const GALLERY_PRIORITY = 250;
 
+// Builds the config for the topic footer "Gallery" button.
+// Registered twice: once for logged-in users, once for anonymous visitors.
 function galleryButtonConfig(anonymousOnly) {
   return {
     id: anonymousOnly ? "topic-gallery-anon" : "topic-gallery",
@@ -27,6 +29,9 @@ function galleryButtonConfig(anonymousOnly) {
   };
 }
 
+// Registers gallery buttons in two places:
+// 1. Topic footer (the bar below the last post) — always registered if user has access
+// 2. Post action menu (per-post "..." area) — only if the site setting is enabled
 export default {
   name: "topic-gallery-button",
 

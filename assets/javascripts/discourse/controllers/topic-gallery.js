@@ -4,6 +4,8 @@ import { action } from "@ember/object";
 import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
 
+// Manages gallery state: the image list, pagination, loading flag, and filters.
+// Each filter change triggers a fresh fetch; "load more" appends the next page.
 export default class TopicGalleryController extends Controller {
   @service router;
 

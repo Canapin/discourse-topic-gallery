@@ -6,6 +6,8 @@ import lightbox from "discourse/lib/lightbox";
 import DiscourseURL from "discourse/lib/url";
 import { i18n } from "discourse-i18n";
 
+// Applies CSS classes to visually group consecutive images from the same post,
+// accounting for the current number of grid columns and row wrapping.
 function applyGroupBorders(grid) {
   const cards = Array.from(grid.querySelectorAll(".gallery-card"));
   if (!cards.length) {
@@ -39,11 +41,14 @@ function applyGroupBorders(grid) {
   });
 }
 
+// Renders the image grid with lightbox support, infinite scroll, and
+// hover highlighting of same-post image groups.
 export default class TopicGalleryGrid extends Component {
   @service router;
 
   observer = null;
 
+  // Infinite scroll: triggers loadMore when the sentinel element becomes visible
   sentinel = modifier((element) => {
     this.observer = new IntersectionObserver(
       (entries) => {
@@ -60,6 +65,7 @@ export default class TopicGalleryGrid extends Component {
     };
   });
 
+  // Sets up post-group borders, lightbox, hover highlighting, and internal link navigation
   groupBorders = modifier((element) => {
     const run = () => applyGroupBorders(element);
 

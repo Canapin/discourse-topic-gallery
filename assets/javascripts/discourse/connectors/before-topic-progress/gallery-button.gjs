@@ -3,6 +3,7 @@ import { action } from "@ember/object";
 import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
 
+// Gallery button next to the mobile topic progress bar
 export default class GalleryProgressButton extends Component {
   @service site;
   @service router;

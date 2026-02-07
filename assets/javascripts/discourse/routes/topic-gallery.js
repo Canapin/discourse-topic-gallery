@@ -1,6 +1,8 @@
 import { ajax } from "discourse/lib/ajax";
 import DiscourseRoute from "discourse/routes/discourse";
 
+// Route handler: fetches gallery data from the server API and
+// forwards query-param filters (username, dates, post number) to the request.
 export default class TopicGalleryRoute extends DiscourseRoute {
   queryParams = {
     username: { replace: true },

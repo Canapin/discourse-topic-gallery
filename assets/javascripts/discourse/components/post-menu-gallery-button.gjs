@@ -3,6 +3,7 @@ import { action } from "@ember/object";
 import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
 
+// Gallery button in each post's action menu — opens the gallery filtered to that post
 export default class PostMenuGalleryButton extends Component {
   @service router;
   @service site;
