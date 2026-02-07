@@ -1,4 +1,5 @@
 import Component from "@glimmer/component";
+import { on } from "@ember/modifier";
 import { service } from "@ember/service";
 import { modifier } from "ember-modifier";
 import ConditionalLoadingSpinner from "discourse/components/conditional-loading-spinner";
@@ -64,6 +65,10 @@ export default class TopicGalleryGrid extends Component {
       this.observer = null;
     };
   });
+
+  revealImage = (event) => {
+    event.target.classList.add("is-loaded");
+  };
 
   // Sets up post-group borders, lightbox, hover highlighting, and internal link navigation
   groupBorders = modifier((element) => {
@@ -160,6 +165,8 @@ export default class TopicGalleryGrid extends Component {
                     class="gallery-image"
                     loading="lazy"
                     alt={{image.filename}}
+                    {{on "load" this.revealImage}}
+                    {{on "error" this.revealImage}}
                   />
                 </span>
                 <span class="informations">{{image.width}}×{{image.height}}
