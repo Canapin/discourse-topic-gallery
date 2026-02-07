@@ -197,6 +197,11 @@
           );
           background-size: 1200px 100%;
         }
+
+        &.no-shimmer {
+          animation: none;
+          background: var(--primary-very-low);
+        }
       }
 
       .gallery-image {
@@ -248,12 +253,6 @@
     &.group-first .gallery-meta {
       visibility: visible;
     }
-  }
-
-  .gallery-loading {
-    text-align: center;
-    padding: 2rem;
-    color: var(--primary-medium);
   }
 
   .no-images-message {

@@ -68,6 +68,7 @@ export default class TopicGalleryGrid extends Component {
 
   revealImage = (event) => {
     event.target.classList.add("is-loaded");
+    event.target.closest(".image-wrapper")?.classList.add("no-shimmer");
   };
 
   // Sets up post-group borders, lightbox, hover highlighting, and internal link navigation

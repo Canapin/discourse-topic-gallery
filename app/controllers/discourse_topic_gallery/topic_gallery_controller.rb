@@ -37,7 +37,7 @@ module DiscourseTopicGallery
         from =
           begin
             Date.parse(params[:from_date])
-          rescue StandardError
+          rescue ArgumentError
             nil
           end
         visible_posts = visible_posts.where("posts.created_at >= ?", from.beginning_of_day) if from
@@ -47,7 +47,7 @@ module DiscourseTopicGallery
         to =
           begin
             Date.parse(params[:to_date])
-          rescue StandardError
+          rescue ArgumentError
             nil
           end
         visible_posts = visible_posts.where("posts.created_at <= ?", to.end_of_day) if to

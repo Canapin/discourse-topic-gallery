@@ -1,27 +1,9 @@
-import Component from "@glimmer/component";
-import { action } from "@ember/object";
-import { service } from "@ember/service";
-import DButton from "discourse/components/d-button";
+import GalleryNavButton from "../../components/gallery-nav-button";
 
 // Gallery button at the bottom of the topic timeline (desktop sidebar)
-export default class GalleryTimelineButton extends Component {
-  @service site;
-  @service router;
-
-  @action
-  openGallery() {
-    const topic = this.args.outletArgs.model;
-    this.router.transitionTo("topicGallery", topic.slug, topic.id);
-  }
-
-  <template>
-    {{#if this.site.can_view_topic_gallery}}
-      <DButton
-        @action={{this.openGallery}}
-        @icon="images"
-        @title="discourse_topic_gallery.gallery_button_title"
-        class="btn-default gallery-link-btn"
-      />
-    {{/if}}
-  </template>
-}
+<template>
+  <GalleryNavButton
+    @topic={{@outletArgs.model}}
+    @class="btn-default gallery-link-btn"
+  />
+</template>
