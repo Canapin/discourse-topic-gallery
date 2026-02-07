@@ -1,6 +1,6 @@
 plugins:
   topic_gallery_enabled:
-    default: false
+    default: true
     client: false
   topic_gallery_allowed_groups:
     type: group_list
