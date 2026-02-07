@@ -23,7 +23,8 @@ after_initialize do
                        __FILE__,
                      )
 
-  # HTML routes: serve the normal topic page (Ember handles the /gallery path client-side)
+  # HTML routes must be prepended so they match before Discourse's catch-all /t/:slug/:id route.
+  # They serve the normal topic page; Ember handles the /gallery path client-side.
   Discourse::Application.routes.prepend do
     constraints(->(req) { !req.path.end_with?(".json") }) do
       get "t/:slug/:topic_id/gallery" => "topics#show", :constraints => { topic_id: /\d+/ }
