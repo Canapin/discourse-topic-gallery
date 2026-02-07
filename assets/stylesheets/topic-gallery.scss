@@ -209,15 +209,6 @@
         height: 100%;
         object-fit: cover;
         display: block;
-        opacity: 0;
-
-        @media (prefers-reduced-motion: no-preference) {
-          transition: opacity 0.3s ease;
-        }
-
-        &.is-loaded {
-          opacity: 1;
-        }
       }
 
       .informations {

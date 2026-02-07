@@ -66,8 +66,7 @@ export default class TopicGalleryGrid extends Component {
     };
   });
 
-  revealImage = (event) => {
-    event.target.classList.add("is-loaded");
+  stopShimmer = (event) => {
     event.target.closest(".image-wrapper")?.classList.add("no-shimmer");
   };
 
@@ -166,8 +165,8 @@ export default class TopicGalleryGrid extends Component {
                     class="gallery-image"
                     loading="lazy"
                     alt={{image.filename}}
-                    {{on "load" this.revealImage}}
-                    {{on "error" this.revealImage}}
+                    {{on "load" this.stopShimmer}}
+                    {{on "error" this.stopShimmer}}
                   />
                 </span>
                 <span class="informations">{{image.width}}×{{image.height}}
@@ -194,6 +193,8 @@ export default class TopicGalleryGrid extends Component {
             <ConditionalLoadingSpinner @condition={{@isLoading}} />
           </div>
         {{/if}}
+      {{else if @isLoading}}
+        <ConditionalLoadingSpinner @condition={{true}} />
       {{else}}
         <div class="no-images-message">
           <p>{{i18n "discourse_topic_gallery.no_images_found"}}</p>

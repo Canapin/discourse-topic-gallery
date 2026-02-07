@@ -1,5 +1,6 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
+import { getOwner } from "@ember/owner";
 import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
 
@@ -13,10 +14,12 @@ export default class PostMenuGalleryButton extends Component {
     const post = this.args.post;
     const topic = post.topic;
 
-    const qp = post.post_number > 1 ? { post_number: post.post_number } : {};
-    this.router.transitionTo("topicGallery", topic.slug, topic.id, {
-      queryParams: qp,
-    });
+    const controller = getOwner(this).lookup("controller:topic-gallery");
+    controller._pendingParams = {
+      post_number: post.post_number > 1 ? String(post.post_number) : "",
+    };
+
+    this.router.transitionTo(`/t/${topic.slug}/${topic.id}/gallery`);
   }
 
   <template>
