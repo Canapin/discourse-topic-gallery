@@ -3,6 +3,7 @@ import Controller from "@ember/controller";
 import { action } from "@ember/object";
 import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
+import { popupAjaxError } from "discourse/lib/ajax-error";
 
 // Manages gallery state: the image list, pagination, loading flag, and filters.
 // Each filter change triggers a fresh fetch; "load more" appends the next page.
@@ -61,6 +62,8 @@ export default class TopicGalleryController extends Controller {
       this.hasMore = result.hasMore;
       this.page = result.page;
       this.total = result.total;
+    } catch (error) {
+      popupAjaxError(error);
     } finally {
       this.isLoading = false;
     }
@@ -80,6 +83,8 @@ export default class TopicGalleryController extends Controller {
       this.hasMore = result.hasMore;
       this.page = result.page;
       this.total = result.total;
+    } catch (error) {
+      popupAjaxError(error);
     } finally {
       this.isLoading = false;
     }
