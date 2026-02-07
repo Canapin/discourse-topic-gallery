@@ -70,6 +70,8 @@ module DiscourseTopicGallery
           .where(target_type: "Post", target_id: visible_posts_sub)
           .where.not(uploads: { width: nil })
           .where.not(uploads: { height: nil })
+          .where("uploads.width >= ?", SiteSetting.topic_gallery_minimum_image_size)
+          .where("uploads.height >= ?", SiteSetting.topic_gallery_minimum_image_size)
           .where(non_content_exclusion)
           .select(
             "upload_references.upload_id",

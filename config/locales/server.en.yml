@@ -2,4 +2,5 @@ en:
   site_settings:
     topic_gallery_enabled: "Enable the topic gallery plugin."
     topic_gallery_allowed_groups: "Groups that are allowed to access the topic gallery."
+    topic_gallery_minimum_image_size: "Minimum width and height (in pixels) for images to appear in the gallery. Images smaller than this in either dimension are excluded."
     topic_gallery_post_menu_button: "Show a gallery button in the post action menu."

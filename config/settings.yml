@@ -8,6 +8,10 @@ plugins:
     default: "1" # admin group
     allow_any: false
     refresh: true
+  topic_gallery_minimum_image_size:
+    default: 64
+    min: 0
+    max: 1000
   topic_gallery_post_menu_button:
     default: true
     client: true
