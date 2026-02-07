@@ -55,13 +55,7 @@ module DiscourseTopicGallery
 
       visible_posts_sub = visible_posts.select(:id)
 
-      # Exclude uploads that are also referenced as system assets (avatars, badges,
-      # theme images, etc.). The upload_references table uses a polymorphic
-      # target_type — an upload used in a post AND as a custom emoji will have
-      # both a 'Post' and a 'CustomEmoji' reference. The main query already
-      # filters on target_type = 'Post', but that alone won't exclude system
-      # assets that happen to appear in post content.
-      #
+      # Exclude uploads that are also referenced as system assets.
       # Blocked (system assets):
       #   CustomEmoji, UserAvatar, User, UserProfile, ThemeField,
       #   ThemeSetting, ThemeSiteSetting, SiteSetting, Badge, Group
