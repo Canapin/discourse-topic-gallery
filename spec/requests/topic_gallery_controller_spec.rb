@@ -351,6 +351,43 @@ describe "TopicGalleryController" do
       end
     end
 
+    context "with minimum image size filtering" do
+      before { sign_in(user) }
+
+      it "excludes images smaller than the minimum size" do
+        small_upload = Fabricate(:upload, user: user, width: 16, height: 16)
+        UploadReference.create!(target: post1, upload: small_upload)
+
+        SiteSetting.topic_gallery_minimum_image_size = 32
+        get "/topic-gallery/#{topic.id}.json"
+
+        ids = response.parsed_body["images"].map { |i| i["id"] }
+        expect(ids).to contain_exactly(upload1.id, upload2.id)
+      end
+
+      it "excludes images where only one dimension is below the minimum" do
+        tall_narrow = Fabricate(:upload, user: user, width: 20, height: 400)
+        UploadReference.create!(target: post1, upload: tall_narrow)
+
+        SiteSetting.topic_gallery_minimum_image_size = 32
+        get "/topic-gallery/#{topic.id}.json"
+
+        ids = response.parsed_body["images"].map { |i| i["id"] }
+        expect(ids).not_to include(tall_narrow.id)
+      end
+
+      it "includes all images when minimum size is 0" do
+        small_upload = Fabricate(:upload, user: user, width: 16, height: 16)
+        UploadReference.create!(target: post1, upload: small_upload)
+
+        SiteSetting.topic_gallery_minimum_image_size = 0
+        get "/topic-gallery/#{topic.id}.json"
+
+        ids = response.parsed_body["images"].map { |i| i["id"] }
+        expect(ids).to include(small_upload.id)
+      end
+    end
+
     context "with duplicate uploads across posts" do
       before { sign_in(user) }
 
