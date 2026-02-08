@@ -10,12 +10,12 @@ import TopicGalleryGrid from "../components/topic-gallery-grid";
 <template>
   <div class="topic-gallery-page">
     <div class="topic-gallery-header">
-      <h1 data-topic-id={{@model.id}}>
+      <h1 data-topic-id={{@controller.topicId}}>
         <a
-          href="/t/{{@model.slug}}/{{@model.id}}"
+          href="/t/{{@controller.slug}}/{{@controller.topicId}}"
           class="topic-back-link"
           {{on "click" @controller.navigateToTopic}}
-        >{{icon "chevron-left"}}{{@model.title}}</a>
+        >{{icon "chevron-left"}}{{@controller.title}}</a>
       </h1>
       <span class="image-count-badge">
         -
