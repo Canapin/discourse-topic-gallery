@@ -10,10 +10,6 @@ export default class TopicGalleryRoute extends DiscourseRoute {
 
   resetController(controller, isExiting) {
     if (isExiting) {
-      controller.username = "";
-      controller.from_date = "";
-      controller.to_date = "";
-      controller.post_number = "";
       controller.filtersVisible = false;
     }
   }

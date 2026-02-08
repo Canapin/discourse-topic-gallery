@@ -62,8 +62,7 @@ export default class TopicGalleryController extends Controller {
     this.fetchImages();
   }
 
-  updateBrowserUrl() {
-    const base = `/t/${this.slug}/${this.topicId}/gallery`;
+  get _filterParams() {
     const params = new URLSearchParams();
     if (this.username) {
       params.set("username", this.username);
@@ -77,26 +76,19 @@ export default class TopicGalleryController extends Controller {
     if (this.post_number) {
       params.set("post_number", this.post_number);
     }
-    const qs = params.toString();
+    return params;
+  }
+
+  updateBrowserUrl() {
+    const base = `/t/${this.slug}/${this.topicId}/gallery`;
+    const qs = this._filterParams.toString();
     window.history.replaceState(null, "", `${base}${qs ? `?${qs}` : ""}`);
   }
 
   buildApiUrl(page) {
-    const params = new URLSearchParams();
+    const params = this._filterParams;
     if (page > 0) {
       params.set("page", page);
-    }
-    if (this.username) {
-      params.set("username", this.username);
-    }
-    if (this.from_date) {
-      params.set("from_date", this.from_date);
-    }
-    if (this.to_date) {
-      params.set("to_date", this.to_date);
-    }
-    if (this.post_number) {
-      params.set("post_number", this.post_number);
     }
     const qs = params.toString();
     return `/topic-gallery/${this.topicId}${qs ? `?${qs}` : ""}`;
