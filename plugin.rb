@@ -24,13 +24,19 @@ after_initialize do
                      )
 
   # HTML routes must be prepended so they match before Discourse's catch-all /t/:slug/:id route.
-  # They serve the normal topic page; Ember handles the /gallery path client-side.
+  # They render the Ember app shell; the client-side route handles the gallery UI.
+  # Using our own controller avoids topics#show's slug-correction redirects which
+  # would strip the /gallery suffix.
   Discourse::Application.routes.prepend do
     constraints(->(req) { !req.path.end_with?(".json") }) do
-      get "t/:slug/:topic_id/gallery" => "topics#show", :constraints => { topic_id: /\d+/ }
-      # Currently not working. Discourse catches the topic URL before the gallery
-      # and redirects to the topic normal view.
-      get "t/:topic_id/gallery" => "topics#show", :constraints => { topic_id: /\d+/ }
+      get "t/:slug/:topic_id/gallery" => "discourse_topic_gallery/topic_gallery#page",
+          :constraints => {
+            topic_id: /\d+/,
+          }
+      get "t/:topic_id/gallery" => "discourse_topic_gallery/topic_gallery#page",
+          :constraints => {
+            topic_id: /\d+/,
+          }
     end
   end
 
@@ -49,8 +55,6 @@ after_initialize do
     scope constraints: { topic_id: /\d+/ } do
       get "/topic-gallery/:topic_id" => "discourse_topic_gallery/topic_gallery#show"
       get "t/:slug/:topic_id/gallery" => "discourse_topic_gallery/topic_gallery#show"
-      # Currenty not working. Discourse catches the topic URL before the gallery
-      # and redirects to the topic normal view.
       get "t/:topic_id/gallery" => "discourse_topic_gallery/topic_gallery#show"
     end
   end

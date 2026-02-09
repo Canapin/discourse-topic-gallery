@@ -6,6 +6,15 @@ module DiscourseTopicGallery
 
     PAGE_SIZE = 30
 
+    # Serves the Ember app shell for the gallery HTML page.
+    # Avoids topics#show which redirects on wrong/missing slug, losing the /gallery suffix.
+    def page
+      topic = Topic.find_by(id: params[:topic_id])
+      raise Discourse::NotFound unless topic
+      guardian.ensure_can_see!(topic)
+      render html: "".html_safe
+    end
+
     # Main endpoint — returns a paginated JSON list of images for a given topic.
     # Supports optional filters: username, post_number, from_date, to_date.
     def show
