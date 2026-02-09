@@ -3,11 +3,20 @@ import { action } from "@ember/object";
 import { getOwner } from "@ember/owner";
 import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
+import { isCategoryExcluded } from "../lib/gallery-category-check";
 
 // Gallery button in each post's action menu — opens the gallery filtered to that post
 export default class PostMenuGalleryButton extends Component {
   @service router;
   @service site;
+  @service siteSettings;
+
+  get showButton() {
+    return (
+      this.site.can_view_topic_gallery &&
+      !isCategoryExcluded(this.siteSettings, this.args.post.topic.category_id)
+    );
+  }
 
   @action
   openGallery() {
@@ -23,7 +32,7 @@ export default class PostMenuGalleryButton extends Component {
   }
 
   <template>
-    {{#if this.site.can_view_topic_gallery}}
+    {{#if this.showButton}}
       <DButton
         class="post-action-menu__gallery gallery"
         ...attributes

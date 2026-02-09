@@ -9,9 +9,7 @@ module DiscourseTopicGallery
     # Serves the Ember app shell for the gallery HTML page.
     # Avoids topics#show which redirects on wrong/missing slug, losing the /gallery suffix.
     def page
-      topic = Topic.find_by(id: params[:topic_id])
-      raise Discourse::NotFound unless topic
-      guardian.ensure_can_see!(topic)
+      find_gallery_topic
       render html: "".html_safe
     end
 
@@ -25,9 +23,7 @@ module DiscourseTopicGallery
         raise Discourse::InvalidAccess
       end
 
-      topic = Topic.find_by(id: params[:topic_id])
-      raise Discourse::NotFound unless topic
-      guardian.ensure_can_see!(topic)
+      topic = find_gallery_topic
 
       # --- Optional filters (all additive) ---
       page = [params[:page].to_i, 0].max
@@ -131,6 +127,17 @@ module DiscourseTopicGallery
     end
 
     private
+
+    def find_gallery_topic
+      topic = Topic.find_by(id: params[:topic_id])
+      raise Discourse::NotFound unless topic
+      guardian.ensure_can_see!(topic)
+
+      excluded = SiteSetting.topic_gallery_excluded_categories_map
+      raise Discourse::InvalidAccess if excluded.include?(topic.category_id)
+
+      topic
+    end
 
     # Scopes posts to only those the current user is allowed to see:
     # excludes deleted, hidden, non-regular types, and posts from ignored users.

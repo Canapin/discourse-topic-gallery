@@ -1,12 +1,13 @@
 import { getOwner } from "@ember/owner";
 import { withPluginApi } from "discourse/lib/plugin-api";
 import PostMenuGalleryButton from "../components/post-menu-gallery-button";
+import { isCategoryExcluded } from "../lib/gallery-category-check";
 
 const GALLERY_PRIORITY = 250;
 
 // Builds the config for the topic footer "Gallery" button.
 // Registered twice: once for logged-in users, once for anonymous visitors.
-function galleryButtonConfig(anonymousOnly) {
+function galleryButtonConfig(anonymousOnly, siteSettings) {
   return {
     id: anonymousOnly ? "topic-gallery-anon" : "topic-gallery",
     icon: "images",
@@ -24,7 +25,11 @@ function galleryButtonConfig(anonymousOnly) {
       return this.site.mobileView;
     },
     displayed() {
-      return !this.site.mobileView && this.site.can_view_topic_gallery;
+      return (
+        !this.site.mobileView &&
+        this.site.can_view_topic_gallery &&
+        !isCategoryExcluded(siteSettings, this.topic.category_id)
+      );
     },
   };
 }
@@ -37,8 +42,8 @@ export default {
 
   initialize() {
     withPluginApi((api) => {
-      api.registerTopicFooterButton(galleryButtonConfig(false));
-      api.registerTopicFooterButton(galleryButtonConfig(true));
+      api.registerTopicFooterButton(galleryButtonConfig(false, siteSettings));
+      api.registerTopicFooterButton(galleryButtonConfig(true, siteSettings));
 
       const siteSettings = api.container.lookup("service:site-settings");
       if (siteSettings.topic_gallery_post_menu_button) {

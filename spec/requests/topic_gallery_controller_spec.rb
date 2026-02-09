@@ -73,6 +73,23 @@ describe "TopicGalleryController" do
         get "/topic-gallery/#{restricted_topic.id}.json"
         expect(response.status).to eq(403)
       end
+
+      it "returns 403 for topic in an excluded category" do
+        SiteSetting.topic_gallery_excluded_categories = topic.category_id.to_s
+        sign_in(user)
+
+        get "/topic-gallery/#{topic.id}.json"
+        expect(response.status).to eq(403)
+      end
+
+      it "allows topic when its category is not excluded" do
+        other_category = Fabricate(:category)
+        SiteSetting.topic_gallery_excluded_categories = other_category.id.to_s
+        sign_in(user)
+
+        get "/topic-gallery/#{topic.id}.json"
+        expect(response.status).to eq(200)
+      end
     end
 
     context "with post visibility" do

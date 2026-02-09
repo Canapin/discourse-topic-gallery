@@ -12,6 +12,10 @@ plugins:
     default: 64
     min: 0
     max: 1000
+  topic_gallery_excluded_categories:
+    type: category_list
+    default: ""
+    client: true
   topic_gallery_post_menu_button:
     default: true
     client: true
