@@ -42,10 +42,10 @@ export default {
 
   initialize() {
     withPluginApi((api) => {
+      const siteSettings = api.container.lookup("service:site-settings");
       api.registerTopicFooterButton(galleryButtonConfig(false, siteSettings));
       api.registerTopicFooterButton(galleryButtonConfig(true, siteSettings));
 
-      const siteSettings = api.container.lookup("service:site-settings");
       if (siteSettings.topic_gallery_post_menu_button) {
         api.registerValueTransformer(
           "post-menu-buttons",
