@@ -6,26 +6,17 @@ module DiscourseTopicGallery
 
     PAGE_SIZE = 30
 
-    # Serves the Ember app shell for the gallery HTML page.
-    # Avoids topics#show which redirects on wrong/missing slug, losing the /gallery suffix.
+    # Serves the Ember app shell for direct browser visits.
+    # Uses our own action instead of topics#show to avoid slug-correction redirects
+    # that would strip the /gallery suffix.
     def page
       find_gallery_topic
       render html: "".html_safe
     end
 
-    # Main endpoint — returns a paginated JSON list of images for a given topic.
-    # Supports optional filters: username, post_number, from_date, to_date.
     def show
-      # --- Access control ---
-      allowed_groups = SiteSetting.topic_gallery_allowed_groups_map
-      everyone_allowed = allowed_groups.include?(Group::AUTO_GROUPS[:everyone])
-      unless everyone_allowed || current_user&.in_any_groups?(allowed_groups)
-        raise Discourse::InvalidAccess
-      end
-
       topic = find_gallery_topic
 
-      # --- Optional filters (all additive) ---
       page = [params[:page].to_i, 0].max
       visible_posts = visible_posts_scope(topic)
 
@@ -79,9 +70,7 @@ module DiscourseTopicGallery
         )
       SQL
 
-      # --- Main query ---
-      # Joins uploads → posts, applies all filters, and uses a window function
-      # (COUNT(*) OVER()) to get the total count without a separate query.
+      # Uses COUNT(*) OVER() to get the total count without a separate query.
       refs_with_total =
         UploadReference
           .joins("INNER JOIN posts ON posts.id = upload_references.target_id")
@@ -108,7 +97,6 @@ module DiscourseTopicGallery
       total = refs_array.first&.total_count.to_i
       upload_ids = refs_array.map(&:upload_id)
 
-      # Eager-load optimized images to avoid N+1 queries during serialization
       uploads = Upload.where(id: upload_ids).includes(:optimized_images).index_by(&:id)
       post_user_ids = refs_array.map(&:post_user_id).uniq
       post_users = User.where(id: post_user_ids).index_by(&:id)
@@ -129,18 +117,22 @@ module DiscourseTopicGallery
     private
 
     def find_gallery_topic
+      allowed_groups = SiteSetting.topic_gallery_allowed_groups_map
+      everyone_allowed = allowed_groups.include?(Group::AUTO_GROUPS[:everyone])
+      unless everyone_allowed || current_user&.in_any_groups?(allowed_groups)
+        raise Discourse::NotFound
+      end
+
       topic = Topic.find_by(id: params[:topic_id])
       raise Discourse::NotFound unless topic
-      guardian.ensure_can_see!(topic)
-
-      excluded = SiteSetting.topic_gallery_excluded_categories_map
-      raise Discourse::InvalidAccess if excluded.include?(topic.category_id)
+      raise Discourse::NotFound unless guardian.can_see?(topic)
+      if SiteSetting.topic_gallery_excluded_categories_map.include?(topic.category_id)
+        raise Discourse::NotFound
+      end
 
       topic
     end
 
-    # Scopes posts to only those the current user is allowed to see:
-    # excludes deleted, hidden, non-regular types, and posts from ignored users.
     def visible_posts_scope(topic)
       allowed_types = [Post.types[:regular]]
       allowed_types << Post.types[:whisper] if guardian.can_see_whispers?
@@ -160,9 +152,6 @@ module DiscourseTopicGallery
       scope
     end
 
-    # Builds the JSON array for each image. Reuses existing optimized thumbnails
-    # when available (via the preloaded association); falls back to create_for
-    # which is itself a find-or-create (no duplicate work).
     def serialize_uploads_from_refs(refs, uploads, post_users, topic)
       refs
         .map do |ref|

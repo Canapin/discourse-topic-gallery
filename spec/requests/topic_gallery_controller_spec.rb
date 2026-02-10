@@ -38,13 +38,13 @@ describe "TopicGalleryController" do
         expect(response.status).to eq(200)
       end
 
-      it "returns 403 when user is not in allowed group" do
+      it "returns 404 when user is not in allowed group" do
         group = Fabricate(:group)
         SiteSetting.topic_gallery_allowed_groups = group.id.to_s
         sign_in(user)
 
         get "/topic-gallery/#{topic.id}.json"
-        expect(response.status).to eq(403)
+        expect(response.status).to eq(404)
       end
 
       it "allows user who is in the allowed group" do
@@ -65,21 +65,21 @@ describe "TopicGalleryController" do
         expect(response.status).to eq(404)
       end
 
-      it "returns 403 for topic in a restricted category" do
+      it "returns 404 for topic in a restricted category" do
         restricted_category = Fabricate(:private_category, group: Fabricate(:group))
         restricted_topic = Fabricate(:topic, category: restricted_category)
         sign_in(user)
 
         get "/topic-gallery/#{restricted_topic.id}.json"
-        expect(response.status).to eq(403)
+        expect(response.status).to eq(404)
       end
 
-      it "returns 403 for topic in an excluded category" do
+      it "returns 404 for topic in an excluded category" do
         SiteSetting.topic_gallery_excluded_categories = topic.category_id.to_s
         sign_in(user)
 
         get "/topic-gallery/#{topic.id}.json"
-        expect(response.status).to eq(403)
+        expect(response.status).to eq(404)
       end
 
       it "allows topic when its category is not excluded" do

@@ -5,7 +5,6 @@ import { isCategoryExcluded } from "../lib/gallery-category-check";
 
 const GALLERY_PRIORITY = 250;
 
-// Builds the config for the topic footer "Gallery" button.
 // Registered twice: once for logged-in users, once for anonymous visitors.
 function galleryButtonConfig(anonymousOnly, siteSettings) {
   return {
@@ -34,9 +33,6 @@ function galleryButtonConfig(anonymousOnly, siteSettings) {
   };
 }
 
-// Registers gallery buttons in two places:
-// 1. Topic footer (the bar below the last post) — always registered if user has access
-// 2. Post action menu (per-post "..." area) — only if the site setting is enabled
 export default {
   name: "topic-gallery-button",
 

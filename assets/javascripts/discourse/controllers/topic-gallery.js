@@ -6,8 +6,6 @@ import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 
-// Manages gallery state: the image list, pagination, loading flag, and filters.
-// Each filter change triggers a fresh fetch; "load more" appends the next page.
 // Query params are managed manually (not via Ember's queryParams) to avoid
 // route re-entry on every filter change.
 export default class TopicGalleryController extends Controller {
@@ -41,7 +39,7 @@ export default class TopicGalleryController extends Controller {
     this.slug = model.slug;
     this.images = [];
     this.total = 0;
-    this.isLoading = true;
+    this.isLoading = !model.result;
 
     const pending = this._pendingParams;
     this._pendingParams = null;
@@ -59,7 +57,23 @@ export default class TopicGalleryController extends Controller {
       this.post_number = url.searchParams.get("post_number") || "";
     }
 
-    this.fetchImages();
+    // The route pre-fetches initial data in its model() hook. Use it unless
+    // _pendingParams were set (e.g. from the post-menu button), in which case
+    // the pre-fetched data doesn't match the requested filters.
+    if (model.result && !pending) {
+      this._applyResult(model.result);
+    } else {
+      this.fetchImages();
+    }
+  }
+
+  _applyResult(result) {
+    this.images = result.images;
+    this.hasMore = result.hasMore;
+    this.page = result.page;
+    this.total = result.total;
+    this.title = result.title;
+    this.isLoading = false;
   }
 
   get _filterParams() {
@@ -103,11 +117,7 @@ export default class TopicGalleryController extends Controller {
       if (fetchId !== this._fetchId) {
         return;
       }
-      this.images = result.images;
-      this.hasMore = result.hasMore;
-      this.page = result.page;
-      this.total = result.total;
-      this.title = result.title;
+      this._applyResult(result);
       this.updateBrowserUrl();
     } catch (error) {
       if (fetchId !== this._fetchId) {
