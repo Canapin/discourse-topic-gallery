@@ -25,7 +25,7 @@ acceptance("Topic Gallery", function (needs) {
   });
 
   test("visiting the gallery route displays the topic title", async function (assert) {
-    await visit("/t/internationalization-localization/280/gallery");
+    await visit("/gallery/internationalization-localization/280");
 
     assert
       .dom(".topic-gallery-page h1")
@@ -35,7 +35,7 @@ acceptance("Topic Gallery", function (needs) {
   test("can navigate to gallery from topic page", async function (assert) {
     await visit("/t/internationalization-localization/280");
 
-    await visit("/t/internationalization-localization/280/gallery");
+    await visit("/gallery/internationalization-localization/280");
 
     assert.dom(".topic-gallery-page").exists();
     assert

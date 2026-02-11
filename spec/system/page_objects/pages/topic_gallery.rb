@@ -4,7 +4,7 @@ module PageObjects
   module Pages
     class TopicGallery < PageObjects::Pages::Base
       def visit_gallery(topic)
-        page.visit("/t/#{topic.slug}/#{topic.id}/gallery")
+        page.visit("/gallery/#{topic.slug}/#{topic.id}")
         self
       end
 
