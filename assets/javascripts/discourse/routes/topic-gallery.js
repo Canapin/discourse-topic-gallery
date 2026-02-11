@@ -2,19 +2,24 @@ import { ajax } from "discourse/lib/ajax";
 import DiscourseRoute from "discourse/routes/discourse";
 
 export default class TopicGalleryRoute extends DiscourseRoute {
-  async model(params) {
+  queryParams = {
+    username: { refreshModel: false, replace: true },
+    from_date: { refreshModel: false, replace: true },
+    to_date: { refreshModel: false, replace: true },
+    post_number: { refreshModel: false, replace: true },
+  };
+
+  async model(params, transition) {
     const id = parseInt(params.id, 10);
     const slug = params.slug;
 
-    // When the post-menu button sets _pendingParams, the controller will
-    // fetch with those filters itself — no need to pre-fetch here.
-    const controller = this.controllerFor("topic-gallery");
-    if (controller._pendingParams) {
-      return { id, slug };
+    const qp = transition.to?.queryParams || {};
+    const qs = new URLSearchParams();
+    for (const [key, value] of Object.entries(qp)) {
+      if (value) {
+        qs.set(key, value);
+      }
     }
-
-    const qs = new URLSearchParams(window.location.search);
-    qs.delete("page");
     const qsStr = qs.toString();
     const url = `/topic-gallery/${id}${qsStr ? `?${qsStr}` : ""}`;
 
@@ -22,9 +27,15 @@ export default class TopicGalleryRoute extends DiscourseRoute {
     return { id, slug, result };
   }
 
+  // Ember keeps queryParams sticky across transitions by default.
+  // Reset them when leaving the gallery so returning shows the full gallery.
   resetController(controller, isExiting) {
     if (isExiting) {
       controller.filtersVisible = false;
+      controller.username = "";
+      controller.from_date = "";
+      controller.to_date = "";
+      controller.post_number = "";
     }
   }
 
