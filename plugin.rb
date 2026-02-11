@@ -18,10 +18,7 @@ module ::DiscourseTopicGallery
 end
 
 after_initialize do
-  require_dependency File.expand_path(
-                       "../app/controllers/discourse_topic_gallery/topic_gallery_controller.rb",
-                       __FILE__,
-                     )
+  require_relative "app/controllers/discourse_topic_gallery/topic_gallery_controller"
 
   # HTML routes must be prepended so they match before Discourse's catch-all /t/:slug/:id route.
   # They render the Ember app shell; the client-side route handles the gallery UI.
