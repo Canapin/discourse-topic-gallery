@@ -214,25 +214,25 @@ describe "TopicGalleryController" do
     end
   end
 
-  describe "GET /t/:slug/:topic_id/gallery (HTML)" do
+  describe "GET /gallery/:slug/:topic_id (HTML)" do
     it "serves the Ember app shell with correct slug" do
       sign_in(user)
-      get "/t/#{topic.slug}/#{topic.id}/gallery"
+      get "/gallery/#{topic.slug}/#{topic.id}"
       expect(response.status).to eq(200)
       expect(response.media_type).to eq("text/html")
     end
 
     it "serves the page even with a wrong slug" do
       sign_in(user)
-      get "/t/wrong-slug/#{topic.id}/gallery"
+      get "/gallery/wrong-slug/#{topic.id}"
       expect(response.status).to eq(200)
     end
   end
 
-  describe "GET /t/:topic_id/gallery (HTML, slugless)" do
+  describe "GET /gallery/:topic_id (HTML, slugless)" do
     it "serves the Ember app shell without a slug" do
       sign_in(user)
-      get "/t/#{topic.id}/gallery"
+      get "/gallery/#{topic.id}"
       expect(response.status).to eq(200)
       expect(response.media_type).to eq("text/html")
     end

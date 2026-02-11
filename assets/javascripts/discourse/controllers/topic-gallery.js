@@ -6,8 +6,6 @@ import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 
-// Query params are managed manually (not via Ember's queryParams) to avoid
-// route re-entry on every filter change.
 export default class TopicGalleryController extends Controller {
   @service router;
 
@@ -23,11 +21,11 @@ export default class TopicGalleryController extends Controller {
   @tracked post_number = "";
   @tracked filtersVisible = false;
 
+  queryParams = ["username", "from_date", "to_date", "post_number"];
   page = 0;
   topicId = null;
   _fetchId = 0;
   _filterTimer = null;
-  _pendingParams = null;
 
   _scheduleFetch() {
     cancel(this._filterTimer);
@@ -37,34 +35,7 @@ export default class TopicGalleryController extends Controller {
   setupModel(model) {
     this.topicId = model.id;
     this.slug = model.slug;
-    this.images = [];
-    this.total = 0;
-    this.isLoading = !model.result;
-
-    const pending = this._pendingParams;
-    this._pendingParams = null;
-
-    if (pending) {
-      this.username = pending.username || "";
-      this.from_date = pending.from_date || "";
-      this.to_date = pending.to_date || "";
-      this.post_number = pending.post_number || "";
-    } else {
-      const url = new URL(window.location.href);
-      this.username = url.searchParams.get("username") || "";
-      this.from_date = url.searchParams.get("from_date") || "";
-      this.to_date = url.searchParams.get("to_date") || "";
-      this.post_number = url.searchParams.get("post_number") || "";
-    }
-
-    // The route pre-fetches initial data in its model() hook. Use it unless
-    // _pendingParams were set (e.g. from the post-menu button), in which case
-    // the pre-fetched data doesn't match the requested filters.
-    if (model.result && !pending) {
-      this._applyResult(model.result);
-    } else {
-      this.fetchImages();
-    }
+    this._applyResult(model.result);
   }
 
   _applyResult(result) {
@@ -93,12 +64,6 @@ export default class TopicGalleryController extends Controller {
     return params;
   }
 
-  updateBrowserUrl() {
-    const base = `/t/${this.slug}/${this.topicId}/gallery`;
-    const qs = this._filterParams.toString();
-    window.history.replaceState(null, "", `${base}${qs ? `?${qs}` : ""}`);
-  }
-
   buildApiUrl(page) {
     const params = this._filterParams;
     if (page > 0) {
@@ -118,7 +83,6 @@ export default class TopicGalleryController extends Controller {
         return;
       }
       this._applyResult(result);
-      this.updateBrowserUrl();
     } catch (error) {
       if (fetchId !== this._fetchId) {
         return;

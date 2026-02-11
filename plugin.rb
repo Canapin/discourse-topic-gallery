@@ -20,23 +20,6 @@ end
 after_initialize do
   require_relative "app/controllers/discourse_topic_gallery/topic_gallery_controller"
 
-  # HTML routes must be prepended so they match before Discourse's catch-all /t/:slug/:id route.
-  # They render the Ember app shell; the client-side route handles the gallery UI.
-  # Using our own controller avoids topics#show's slug-correction redirects which
-  # would strip the /gallery suffix.
-  Discourse::Application.routes.prepend do
-    constraints(->(req) { !req.path.end_with?(".json") }) do
-      get "t/:slug/:topic_id/gallery" => "discourse_topic_gallery/topic_gallery#page",
-          :constraints => {
-            topic_id: /\d+/,
-          }
-      get "t/:topic_id/gallery" => "discourse_topic_gallery/topic_gallery#page",
-          :constraints => {
-            topic_id: /\d+/,
-          }
-    end
-  end
-
   # Expose gallery permission to the client so the UI can show/hide the button
   add_to_serializer(:site, :can_view_topic_gallery) do
     allowed = SiteSetting.topic_gallery_allowed_groups_map
@@ -47,12 +30,17 @@ after_initialize do
     end
   end
 
-  # JSON API routes: return gallery data (images, pagination, metadata)
+  # All routes use /gallery/ prefix — no conflict with Discourse's /t/ catch-all,
+  # so no need to prepend. HTML routes serve the Ember app shell; JSON routes
+  # return gallery data.
   Discourse::Application.routes.append do
     scope constraints: { topic_id: /\d+/ } do
+      constraints(->(req) { !req.path.end_with?(".json") }) do
+        get "gallery/:slug/:topic_id" => "discourse_topic_gallery/topic_gallery#page"
+        get "gallery/:topic_id" => "discourse_topic_gallery/topic_gallery#page"
+      end
+
       get "/topic-gallery/:topic_id" => "discourse_topic_gallery/topic_gallery#show"
-      get "t/:slug/:topic_id/gallery" => "discourse_topic_gallery/topic_gallery#show"
-      get "t/:topic_id/gallery" => "discourse_topic_gallery/topic_gallery#show"
     end
   end
 end
