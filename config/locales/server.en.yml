@@ -4,4 +4,4 @@ en:
     topic_gallery_allowed_groups: "Groups that are allowed to access the topic gallery."
     topic_gallery_minimum_image_size: "Minimum width and height (in pixels) for images to appear in the gallery. Images smaller than this in either dimension are excluded."
     topic_gallery_excluded_categories: "Categories where the topic gallery is disabled. Topics in these categories will not show gallery buttons or the gallery page."
-    topic_gallery_post_menu_button: "Show a gallery button in the post action menu."
+    topic_gallery_post_menu_button: "Show a gallery button inside each post."
