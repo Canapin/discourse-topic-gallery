@@ -3,9 +3,141 @@ import { on } from "@ember/modifier";
 import { service } from "@ember/service";
 import { modifier } from "ember-modifier";
 import ConditionalLoadingSpinner from "discourse/components/conditional-loading-spinner";
-import lightbox from "discourse/lib/lightbox";
+import { helperContext } from "discourse/lib/helpers";
 import DiscourseURL from "discourse/lib/url";
 import { i18n } from "discourse-i18n";
+import PhotoSwipe from "../lib/photoswipe";
+import PhotoSwipeLightbox from "../lib/photoswipe-lightbox";
+
+function initGridLightbox(gridElement, { onLastSlide }) {
+  const siteSettings = helperContext().siteSettings;
+  const currentUser = helperContext()?.currentUser;
+  const caps = helperContext().capabilities;
+  const canDownload =
+    !siteSettings.prevent_anons_from_downloading_files || !!currentUser;
+
+  const lb = new PhotoSwipeLightbox({
+    gallery: gridElement,
+    children: "a.lightbox",
+    showHideAnimationType: "zoom",
+    counter: false,
+    escKey: false,
+    tapAction(pt, event) {
+      if (event.target.classList.contains("pswp__img")) {
+        lb.pswp?.element?.classList.toggle("pswp--ui-visible");
+      } else {
+        lb.pswp?.close();
+      }
+    },
+    paddingFn(viewportSize) {
+      if (viewportSize.x < 1200 || caps.isMobileDevice) {
+        return { top: 0, bottom: 0, left: 0, right: 0 };
+      }
+      return { top: 20, bottom: 75, left: 20, right: 20 };
+    },
+    pswpModule: PhotoSwipe,
+  });
+
+  lb.addFilter("itemData", (data) => {
+    const el = data.element;
+    if (!el) {
+      return data;
+    }
+
+    const width = Number(el.getAttribute("data-target-width"));
+    const height = Number(el.getAttribute("data-target-height"));
+
+    data.thumbCropped = true;
+    data.src = el.getAttribute("href");
+    data.title = el.title;
+    data.details = el.querySelector(".informations")?.textContent || "";
+    data.w = data.width = width;
+    data.h = data.height = height;
+
+    return data;
+  });
+
+  lb.on("afterInit", () => {
+    lb.pswp.element.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        event.preventDefault();
+        lb.pswp.close();
+      }
+    });
+  });
+
+  lb.on("change", () => {
+    const pswp = lb.pswp;
+    if (pswp.currIndex >= pswp.getNumItems() - 1) {
+      onLastSlide?.();
+    }
+  });
+
+  lb.on("uiRegister", () => {
+    lb.pswp.ui.registerElement({
+      name: "custom-counter",
+      order: 6,
+      isButton: false,
+      appendTo: "bar",
+      onInit: (el, pswp) => {
+        pswp.on("change", () => {
+          el.textContent = `${pswp.currIndex + 1} / ${pswp.getNumItems()}`;
+        });
+      },
+    });
+
+    if (canDownload) {
+      lb.pswp.ui.registerElement({
+        name: "download-image",
+        order: 7,
+        isButton: true,
+        tagName: "a",
+        title: i18n("lightbox.download"),
+        html: {
+          isCustomSVG: true,
+          inner:
+            '<path d="M20.5 14.3 17.1 18V10h-2.2v7.9l-3.4-3.6L10 16l6 6.1 6-6.1ZM23 23H9v2h14Z" id="pswp__icn-download"/>',
+          outlineID: "pswp__icn-download",
+        },
+        onInit: (el, pswp) => {
+          el.setAttribute("download", "");
+          el.setAttribute("target", "_blank");
+          el.setAttribute("rel", "noopener");
+          pswp.on("change", () => {
+            el.href = pswp.currSlide.data.element?.dataset.downloadHref || "";
+          });
+        },
+      });
+    }
+
+    lb.pswp.ui.registerElement({
+      name: "caption",
+      order: 11,
+      isButton: false,
+      appendTo: "root",
+      html: "",
+      onInit: (caption, pswp) => {
+        pswp.on("change", () => {
+          const { title, details } = pswp.currSlide.data;
+          const parts = [];
+          if (title) {
+            parts.push(
+              `<div class='pswp__caption-title'>${title.replace(/[<>&"]/g, (c) => `&#${c.charCodeAt(0)};`)}</div>`
+            );
+          }
+          if (details) {
+            parts.push(`<div class='pswp__caption-details'>${details}</div>`);
+          }
+          caption.innerHTML = parts.join("");
+        });
+      },
+    });
+  });
+
+  lb.init();
+  return lb;
+}
 
 // Applies CSS classes to visually group consecutive images from the same post,
 // accounting for the current number of grid columns and row wrapping.
@@ -73,10 +205,50 @@ export default class TopicGalleryGrid extends Component {
   // Sets up post-group borders, lightbox, hover highlighting, and internal link navigation
   groupBorders = modifier((element) => {
     const run = () => applyGroupBorders(element);
+    let lb = null;
+    let loadingMore = false;
+    let needsRebuild = false;
+
+    const buildLightbox = () => {
+      lb?.destroy();
+      lb = initGridLightbox(element, {
+        onLastSlide: async () => {
+          if (loadingMore) {
+            return;
+          }
+          loadingMore = true;
+          try {
+            await this.args.loadMore?.();
+          } finally {
+            loadingMore = false;
+          }
+        },
+      });
+      lb.on("close", () => {
+        if (needsRebuild) {
+          needsRebuild = false;
+          buildLightbox();
+        }
+      });
+    };
 
     const mutationObserver = new MutationObserver(() => {
       run();
-      lightbox(element);
+      if (lb?.pswp) {
+        const pswp = lb.pswp;
+        pswp.options.dataSource.items = [
+          ...element.querySelectorAll("a.lightbox"),
+        ];
+        const idx = pswp.currIndex;
+        if (idx > 0) {
+          pswp.refreshSlideContent(idx - 1);
+        }
+        pswp.refreshSlideContent(idx);
+        pswp.refreshSlideContent(idx + 1);
+        needsRebuild = true;
+      } else {
+        buildLightbox();
+      }
     });
     mutationObserver.observe(element, { childList: true });
 
@@ -134,9 +306,10 @@ export default class TopicGalleryGrid extends Component {
     element.addEventListener("click", onClick);
 
     run();
-    lightbox(element);
+    buildLightbox();
 
     return () => {
+      lb?.destroy();
       mutationObserver.disconnect();
       resizeObserver.disconnect();
       element.removeEventListener("mouseover", onOver);
