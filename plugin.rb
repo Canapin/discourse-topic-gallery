@@ -35,11 +35,21 @@ after_initialize do
   # return gallery data.
   Discourse::Application.routes.append do
     scope constraints: { topic_id: /\d+/ } do
+      # HTML routes (Ember app shell)
       constraints(->(req) { !req.path.end_with?(".json") }) do
         get "gallery/:slug/:topic_id" => "discourse_topic_gallery/topic_gallery#page"
         get "gallery/:topic_id" => "discourse_topic_gallery/topic_gallery#page"
       end
 
+      # JSON routes (gallery data) - support both URL formats
+      get "gallery/:slug/:topic_id" => "discourse_topic_gallery/topic_gallery#show",
+          :defaults => {
+            format: :json,
+          }
+      get "gallery/:topic_id" => "discourse_topic_gallery/topic_gallery#show",
+          :defaults => {
+            format: :json,
+          }
       get "/topic-gallery/:topic_id" => "discourse_topic_gallery/topic_gallery#show"
     end
   end
