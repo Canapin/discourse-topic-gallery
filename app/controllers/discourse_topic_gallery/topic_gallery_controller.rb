@@ -70,8 +70,8 @@ module DiscourseTopicGallery
         )
       SQL
 
-      # Uses COUNT(*) OVER() to get the total count without a separate query.
-      refs_with_total =
+      # Base query for all valid upload references
+      base_scope =
         UploadReference
           .joins("INNER JOIN posts ON posts.id = upload_references.target_id")
           .joins("INNER JOIN uploads ON uploads.id = upload_references.upload_id")
@@ -81,20 +81,40 @@ module DiscourseTopicGallery
           .where("uploads.width >= ?", SiteSetting.topic_gallery_minimum_image_size)
           .where("uploads.height >= ?", SiteSetting.topic_gallery_minimum_image_size)
           .where(system_exclusion)
+
+      # Get total count of unique uploads (for pagination)
+      total = base_scope.select("uploads.id").distinct.count
+
+      # Use window function to deduplicate in a single pass
+      # ROW_NUMBER() assigns 1 to the first occurrence of each upload (by post order)
+      ranked_sql = base_scope
+        .select(
+          "upload_references.upload_id",
+          "upload_references.id AS ref_id",
+          "posts.id AS post_id",
+          "posts.post_number",
+          "posts.user_id AS post_user_id",
+          "ROW_NUMBER() OVER (PARTITION BY uploads.id ORDER BY posts.post_number, upload_references.id) AS row_num",
+        )
+        .to_sql
+
+      # Filter to first occurrence (row_num = 1) and apply pagination
+      refs_with_total =
+        UploadReference
+          .from("(#{ranked_sql}) AS ranked_refs")
+          .where("row_num = 1")
           .select(
-            "upload_references.upload_id",
-            "upload_references.id AS ref_id",
-            "posts.id AS post_id",
-            "posts.post_number",
-            "posts.user_id AS post_user_id",
-            "COUNT(*) OVER() AS total_count",
+            "upload_id",
+            "ref_id",
+            "post_id",
+            "post_number",
+            "post_user_id",
           )
-          .order("posts.post_number ASC, upload_references.id ASC")
+          .order("post_number ASC, ref_id ASC")
           .offset(page * PAGE_SIZE)
           .limit(PAGE_SIZE)
 
       refs_array = refs_with_total.to_a
-      total = refs_array.first&.total_count.to_i
       upload_ids = refs_array.map(&:upload_id)
 
       uploads = Upload.where(id: upload_ids).includes(:optimized_images).index_by(&:id)
