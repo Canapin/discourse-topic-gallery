@@ -120,16 +120,48 @@ function initGridLightbox(gridElement, { onLastSlide }) {
       html: "",
       onInit: (caption, pswp) => {
         pswp.on("change", () => {
-          const { title, details } = pswp.currSlide.data;
+          const { title, details, element } = pswp.currSlide.data;
           const parts = [];
-          if (title) {
-            parts.push(
-              `<div class='pswp__caption-title'>${title.replace(/[<>&"]/g, (c) => `&#${c.charCodeAt(0)};`)}</div>`
-            );
+
+          // Build title with inline post info
+          if (title || element) {
+            let titleHtml = "";
+
+            if (title) {
+              titleHtml = title.replace(
+                /[<>&"]/g,
+                (c) => `&#${c.charCodeAt(0)};`
+              );
+            }
+
+            // Add post link inline
+            if (element) {
+              const card = element.closest(".gallery-card");
+              if (card) {
+                const username = card.querySelector(".mention")?.textContent;
+                const postLink = card.querySelector(".gallery-post-link");
+                if (username && postLink) {
+                  const postNumber = postLink.textContent;
+                  const postUrl = postLink.getAttribute("href");
+                  const postInfo =
+                    `<span class='pswp__caption-post'>` +
+                    `${username} ` +
+                    `<a href="${postUrl}" class="pswp__caption-post-link">${postNumber}</a>` +
+                    `</span>`;
+                  titleHtml = titleHtml ? `${titleHtml} ${postInfo}` : postInfo;
+                }
+              }
+            }
+
+            if (titleHtml) {
+              parts.push(`<div class='pswp__caption-title'>${titleHtml}</div>`);
+            }
           }
+
           if (details) {
             parts.push(`<div class='pswp__caption-details'>${details}</div>`);
           }
+
           caption.innerHTML = parts.join("");
         });
       },
