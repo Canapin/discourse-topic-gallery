@@ -22,6 +22,7 @@ function initGridLightbox(gridElement, { onLastSlide }) {
     showHideAnimationType: "zoom",
     counter: false,
     escKey: false,
+    loop: false,
     tapAction(pt, event) {
       if (event.target.classList.contains("pswp__img")) {
         lb.pswp?.element?.classList.toggle("pswp--ui-visible");
