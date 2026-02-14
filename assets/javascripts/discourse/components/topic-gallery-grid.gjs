@@ -128,10 +128,11 @@ function initGridLightbox(gridElement, { onLastSlide }) {
             let titleHtml = "";
 
             if (title) {
-              titleHtml = title.replace(
+              const escaped = title.replace(
                 /[<>&"]/g,
                 (c) => `&#${c.charCodeAt(0)};`
               );
+              titleHtml = `<span class='pswp__caption-text'>${escaped}</span>`;
             }
 
             // Add post link inline
