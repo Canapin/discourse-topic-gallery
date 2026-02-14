@@ -21,7 +21,7 @@ export default class TopicGalleryController extends Controller {
   @tracked post_number = "";
   @tracked filtersVisible = false;
 
-  queryParams = ["username", "from_date", "to_date", "post_number"];
+  queryParams = ["username", "post_number"];
   page = 0;
   topicId = null;
   _fetchId = 0;
@@ -29,12 +29,26 @@ export default class TopicGalleryController extends Controller {
 
   _scheduleFetch() {
     cancel(this._filterTimer);
-    this._filterTimer = later(this, this.fetchImages, 50);
+    this._filterTimer = later(this, this._fetchAndSyncUrl, 50);
+  }
+
+  _syncUrl() {
+    const params = this._filterParams;
+    const qs = params.toString();
+    const path = `/gallery/${this.slug}/${this.topicId}${qs ? `?${qs}` : ""}`;
+    window.history.replaceState(null, "", path);
+  }
+
+  async _fetchAndSyncUrl() {
+    await this.fetchImages();
+    this._syncUrl();
   }
 
   setupModel(model) {
     this.topicId = model.id;
     this.slug = model.slug;
+    this.from_date = model.from_date || "";
+    this.to_date = model.to_date || "";
     this._applyResult(model.result);
   }
 

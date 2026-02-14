@@ -4,8 +4,6 @@ import DiscourseRoute from "discourse/routes/discourse";
 export default class TopicGalleryRoute extends DiscourseRoute {
   queryParams = {
     username: { refreshModel: false, replace: true },
-    from_date: { refreshModel: false, replace: true },
-    to_date: { refreshModel: false, replace: true },
     post_number: { refreshModel: false, replace: true },
   };
 
@@ -14,8 +12,15 @@ export default class TopicGalleryRoute extends DiscourseRoute {
     const slug = params.slug;
 
     const qp = transition.to?.queryParams || {};
+    const urlParams = new URLSearchParams(window.location.search);
     const qs = new URLSearchParams();
     for (const [key, value] of Object.entries(qp)) {
+      if (value) {
+        qs.set(key, value);
+      }
+    }
+    for (const key of ["from_date", "to_date"]) {
+      const value = urlParams.get(key);
       if (value) {
         qs.set(key, value);
       }
@@ -24,7 +29,13 @@ export default class TopicGalleryRoute extends DiscourseRoute {
     const url = `/topic-gallery/${id}${qsStr ? `?${qsStr}` : ""}`;
 
     const result = await ajax(url);
-    return { id, slug, result };
+    return {
+      id,
+      slug,
+      result,
+      from_date: qs.get("from_date") || "",
+      to_date: qs.get("to_date") || "",
+    };
   }
 
   // Ember keeps queryParams sticky across transitions by default.
