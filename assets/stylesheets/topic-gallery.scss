@@ -307,6 +307,13 @@
   padding: 0.25em 0.6em;
   color: rgb(255 255 255 / 0.85);
   white-space: nowrap;
+  background: rgb(0 0 0 / 0.4);
+  border-radius: 20px;
+
+  @include viewport.from(md) {
+    background: none;
+    border-radius: 0;
+  }
 
   .pswp__caption-post-link {
     color: var(--tertiary);
