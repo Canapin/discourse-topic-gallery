@@ -238,10 +238,14 @@
     }
 
     .gallery-meta {
-      display: flex;
-      align-items: center;
-      margin-top: auto;
-      visibility: hidden;
+      display: none;
+
+      @include viewport.from(md) {
+        display: flex;
+        align-items: center;
+        margin-top: auto;
+        visibility: hidden;
+      }
 
       a {
         color: var(--primary);
@@ -259,7 +263,9 @@
     }
 
     &.group-first .gallery-meta {
-      visibility: visible;
+      @include viewport.from(md) {
+        visibility: visible;
+      }
     }
   }
 
