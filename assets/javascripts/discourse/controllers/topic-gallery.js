@@ -161,6 +161,12 @@ export default class TopicGalleryController extends Controller {
   }
 
   @action
+  updatePostNumber(event) {
+    this.post_number = event.target.value || "";
+    this._scheduleFetch();
+  }
+
+  @action
   updateUsername(val) {
     const selected = Array.isArray(val) ? val[0] : val;
     this.username = selected || "";

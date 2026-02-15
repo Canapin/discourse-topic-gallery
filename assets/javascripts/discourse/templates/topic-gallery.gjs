@@ -46,12 +46,14 @@ import TopicGalleryGrid from "../components/topic-gallery-grid";
     {{/if}}
     <div
       class={{concat
-        "admin-controls"
+        "gallery-filters"
         (if @controller.filtersVisible " is-visible")
       }}
     >
-      <div class="control-unit">
-        <label>{{i18n "discourse_topic_gallery.filter_by_user"}}</label>
+      <div class="control-group">
+        <label class="control-label">{{i18n
+            "discourse_topic_gallery.filter_by_user"
+          }}</label>
         <UserChooser
           @value={{if @controller.username @controller.username null}}
           @onChange={{@controller.updateUsername}}
@@ -63,16 +65,33 @@ import TopicGalleryGrid from "../components/topic-gallery-grid";
         />
       </div>
 
-      <div class="control-unit">
-        <label>{{i18n "discourse_topic_gallery.from_date"}}</label>
+      <div class="control-group">
+        <label class="control-label">{{i18n
+            "discourse_topic_gallery.from_post_label"
+          }}</label>
+        <input
+          type="number"
+          min="1"
+          class="post-number-input"
+          value={{@controller.post_number}}
+          {{on "change" @controller.updatePostNumber}}
+        />
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">{{i18n
+            "discourse_topic_gallery.from_date"
+          }}</label>
         <DatePicker
           @value={{@controller.from_date}}
           @onSelect={{@controller.updateFromDate}}
         />
       </div>
 
-      <div class="control-unit">
-        <label>{{i18n "discourse_topic_gallery.to_date"}}</label>
+      <div class="control-group">
+        <label class="control-label">{{i18n
+            "discourse_topic_gallery.to_date"
+          }}</label>
         <DatePicker
           @value={{@controller.to_date}}
           @onSelect={{@controller.updateToDate}}
@@ -80,15 +99,12 @@ import TopicGalleryGrid from "../components/topic-gallery-grid";
       </div>
 
       {{#if @controller.hasFilters}}
-        <div class="control-unit">
-          <label>&#8203;</label>
-          <DButton
-            @action={{@controller.clearFilters}}
-            @icon="xmark"
-            @label="discourse_topic_gallery.clear_filters"
-            class="btn-default clear-filters-btn"
-          />
-        </div>
+        <DButton
+          @action={{@controller.clearFilters}}
+          @icon="xmark"
+          @label="discourse_topic_gallery.clear_filters"
+          class="btn-default clear-filters-btn"
+        />
       {{/if}}
     </div>
 

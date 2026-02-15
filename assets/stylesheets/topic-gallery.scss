@@ -84,7 +84,7 @@
   }
 }
 
-.admin-controls {
+.gallery-filters {
   display: none;
   flex-wrap: wrap;
   gap: 20px;
@@ -93,7 +93,7 @@
   margin-bottom: 20px;
   border: 1px solid var(--primary-low);
   border-radius: 8px;
-  align-items: baseline;
+  align-items: flex-end;
   box-sizing: border-box;
 
   @include viewport.from(md) {
@@ -104,19 +104,13 @@
     display: flex;
   }
 
-  .control-unit {
+  .control-group {
     flex: 1 1 100%;
     box-sizing: border-box;
+    margin-bottom: 0;
 
     @include viewport.from(md) {
       flex: 0 1 auto;
-    }
-
-    label {
-      font-weight: bold;
-      margin-bottom: 5px;
-      display: block;
-      color: var(--primary-high);
     }
 
     .user-chooser {
