@@ -115,6 +115,7 @@
 
     .user-chooser {
       width: 100%;
+      margin-bottom: 9px;
 
       @include viewport.from(md) {
         min-width: 300px;
