@@ -124,6 +124,7 @@ module DiscourseTopicGallery
                page: page,
                hasMore: ((page + 1) * PAGE_SIZE) < total,
                total: total,
+               postsCount: topic.posts_count,
              }
     end
 

@@ -13,6 +13,7 @@ export default class TopicGalleryController extends Controller {
   @tracked hasMore = false;
   @tracked isLoading = false;
   @tracked total = 0;
+  @tracked postsCount = 0;
   @tracked title = "";
   @tracked slug = "";
   @tracked username = "";
@@ -57,6 +58,7 @@ export default class TopicGalleryController extends Controller {
     this.hasMore = result.hasMore;
     this.page = result.page;
     this.total = result.total;
+    this.postsCount = result.postsCount;
     this.title = result.title;
     this.isLoading = false;
   }

@@ -68,10 +68,12 @@ import TopicGalleryGrid from "../components/topic-gallery-grid";
       <div class="control-group">
         <label class="control-label">{{i18n
             "discourse_topic_gallery.from_post_label"
+            count=@controller.postsCount
           }}</label>
         <input
           type="number"
           min="1"
+          max={{@controller.postsCount}}
           class="post-number-input"
           value={{@controller.post_number}}
           {{on "change" @controller.updatePostNumber}}
