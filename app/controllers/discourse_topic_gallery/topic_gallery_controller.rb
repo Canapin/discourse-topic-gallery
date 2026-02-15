@@ -10,10 +10,8 @@ module DiscourseTopicGallery
     # Uses our own action instead of topics#show to avoid slug-correction redirects
     # that would strip the /gallery suffix.
     def page
-      topic = find_gallery_topic
-      @title = I18n.t("js.discourse_topic_gallery.page_title", title: topic.title)
-      @description_meta = I18n.t("discourse_topic_gallery.gallery_description", title: topic.title)
-      @topic = topic
+      find_gallery_topic
+      render html: "".html_safe
     end
 
     def show

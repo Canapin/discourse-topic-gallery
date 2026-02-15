@@ -30,6 +30,29 @@ after_initialize do
     end
   end
 
+  # Inject gallery-specific title and description for gallery pages
+  register_modifier(:meta_data_content) do |content, property, opts|
+    url = opts[:url]
+    if url&.match?(%r{\A/gallery/})
+      topic_id = url.match(%r{/(\d+)(?:\?|$)})&.[](1)
+      if topic_id
+        topic = Topic.find_by(id: topic_id)
+        if topic
+          case property
+          when :title
+            next(
+              I18n.t("js.discourse_topic_gallery.page_title", title: topic.title) + " - " +
+                SiteSetting.title
+            )
+          when :description
+            next I18n.t("discourse_topic_gallery.gallery_description", title: topic.title)
+          end
+        end
+      end
+    end
+    content
+  end
+
   # All routes use /gallery/ prefix — no conflict with Discourse's /t/ catch-all,
   # so no need to prepend. HTML routes serve the Ember app shell; JSON routes
   # return gallery data.
