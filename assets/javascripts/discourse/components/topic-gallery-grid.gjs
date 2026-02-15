@@ -217,32 +217,16 @@ export default class TopicGalleryGrid extends Component {
 
   // Infinite scroll: triggers loadMore when the sentinel element becomes visible
   sentinel = modifier((element) => {
-    let initialCheck = true;
-
     this.observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
-          // The observer fires immediately on observe() if already visible.
-          // Skip that initial callback to avoid double-loading on render.
-          if (initialCheck) {
-            initialCheck = false;
-            return;
-          }
-
-          // Don't trigger if already loading
-          if (this.args.isLoading) {
-            return;
-          }
-
+        if (entries[0].isIntersecting && !this.args.isLoading) {
           this.args.loadMore?.();
-        } else {
-          // Sentinel scrolled out of view — any future intersection is real
-          initialCheck = false;
         }
       },
       { rootMargin: "300px" }
     );
     this.observer.observe(element);
+
     return () => {
       this.observer?.disconnect();
       this.observer = null;

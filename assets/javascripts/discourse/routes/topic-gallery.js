@@ -52,6 +52,7 @@ export default class TopicGalleryRoute extends DiscourseRoute {
 
   setupController(controller, model) {
     super.setupController(controller, model);
+    window.scrollTo(0, 0);
     controller.setupModel(model);
   }
 }
