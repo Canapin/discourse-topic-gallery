@@ -20,6 +20,7 @@ acceptance("Topic Gallery", function (needs) {
         page: 0,
         hasMore: false,
         total: 0,
+        postsCount: 20,
       })
     );
   });
