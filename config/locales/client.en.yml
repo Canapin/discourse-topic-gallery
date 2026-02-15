@@ -17,3 +17,4 @@ en:
       clear_filters: "Clear"
       from_post: "From post #%{number}"
       no_images_found: "No images found in this topic."
+      page_title: "Gallery - %{title}"

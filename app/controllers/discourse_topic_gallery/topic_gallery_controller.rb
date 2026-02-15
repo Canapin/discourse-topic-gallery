@@ -10,8 +10,10 @@ module DiscourseTopicGallery
     # Uses our own action instead of topics#show to avoid slug-correction redirects
     # that would strip the /gallery suffix.
     def page
-      find_gallery_topic
-      render html: "".html_safe
+      topic = find_gallery_topic
+      @title = I18n.t("js.discourse_topic_gallery.page_title", title: topic.title)
+      @description_meta = I18n.t("discourse_topic_gallery.gallery_description", title: topic.title)
+      @topic = topic
     end
 
     def show
@@ -87,29 +89,22 @@ module DiscourseTopicGallery
 
       # Use window function to deduplicate in a single pass
       # ROW_NUMBER() assigns 1 to the first occurrence of each upload (by post order)
-      ranked_sql = base_scope
-        .select(
+      ranked_sql =
+        base_scope.select(
           "upload_references.upload_id",
           "upload_references.id AS ref_id",
           "posts.id AS post_id",
           "posts.post_number",
           "posts.user_id AS post_user_id",
           "ROW_NUMBER() OVER (PARTITION BY uploads.id ORDER BY posts.post_number, upload_references.id) AS row_num",
-        )
-        .to_sql
+        ).to_sql
 
       # Filter to first occurrence (row_num = 1) and apply pagination
       refs_with_total =
         UploadReference
           .from("(#{ranked_sql}) AS ranked_refs")
           .where("row_num = 1")
-          .select(
-            "upload_id",
-            "ref_id",
-            "post_id",
-            "post_number",
-            "post_user_id",
-          )
+          .select("upload_id", "ref_id", "post_id", "post_number", "post_user_id")
           .order("post_number ASC, ref_id ASC")
           .offset(page * PAGE_SIZE)
           .limit(PAGE_SIZE)

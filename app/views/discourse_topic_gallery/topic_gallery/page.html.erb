@@ -1,0 +1,8 @@
+<% content_for :head do %>
+  <%= raw crawlable_meta_data(
+    title: @title,
+    description: @description_meta,
+    image: @topic.image_url,
+    ignore_canonical: true
+  ) %>
+<% end %>

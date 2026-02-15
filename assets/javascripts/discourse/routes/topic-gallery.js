@@ -1,11 +1,21 @@
 import { ajax } from "discourse/lib/ajax";
 import DiscourseRoute from "discourse/routes/discourse";
+import { i18n } from "discourse-i18n";
 
 export default class TopicGalleryRoute extends DiscourseRoute {
   queryParams = {
     username: { refreshModel: false, replace: true },
     post_number: { refreshModel: false, replace: true },
   };
+
+  titleToken() {
+    const model = this.modelFor("topicGallery");
+    if (model?.result?.title) {
+      return i18n("discourse_topic_gallery.page_title", {
+        title: model.result.title,
+      });
+    }
+  }
 
   async model(params, transition) {
     const id = parseInt(params.id, 10);
