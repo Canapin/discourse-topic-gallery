@@ -31,7 +31,7 @@ import TopicGalleryGrid from "../components/topic-gallery-grid";
         }}
       />
     </div>
-    {{#if @controller.post_number}}
+    {{#if @controller.hasPostNumberFilter}}
       <div class="post-number-chip">
         <span>{{i18n
             "discourse_topic_gallery.from_post"

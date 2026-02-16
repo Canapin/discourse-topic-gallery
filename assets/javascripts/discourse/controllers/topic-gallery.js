@@ -74,7 +74,7 @@ export default class TopicGalleryController extends Controller {
     if (this.to_date) {
       params.set("to_date", this.to_date);
     }
-    if (this.post_number) {
+    if (this.hasPostNumberFilter) {
       params.set("post_number", this.post_number);
     }
     return params;
@@ -132,8 +132,17 @@ export default class TopicGalleryController extends Controller {
     }
   }
 
+  get hasPostNumberFilter() {
+    return this.post_number && parseInt(this.post_number, 10) > 1;
+  }
+
   get hasFilters() {
-    return this.username || this.from_date || this.to_date || this.post_number;
+    return (
+      this.username ||
+      this.from_date ||
+      this.to_date ||
+      this.hasPostNumberFilter
+    );
   }
 
   @action
