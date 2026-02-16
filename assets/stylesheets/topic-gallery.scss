@@ -17,6 +17,8 @@
 
   .gallery-progress-btn {
     border-radius: 0;
+    background: var(--secondary);
+    border: 1px solid var(--primary-low);
   }
 }
 
