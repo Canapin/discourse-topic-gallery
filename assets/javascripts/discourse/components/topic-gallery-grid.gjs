@@ -362,7 +362,6 @@ export default class TopicGalleryGrid extends Component {
               <a
                 href={{image.url}}
                 class="lightbox image-preview-link"
-                title={{image.filename}}
                 data-download-href={{image.downloadUrl}}
                 data-target-width={{image.width}}
                 data-target-height={{image.height}}
@@ -372,7 +371,7 @@ export default class TopicGalleryGrid extends Component {
                     src={{image.thumbnailUrl}}
                     class="gallery-image"
                     loading="lazy"
-                    alt={{image.filename}}
+                    alt=""
                     {{on "load" this.stopShimmer}}
                     {{on "error" this.stopShimmer}}
                   />

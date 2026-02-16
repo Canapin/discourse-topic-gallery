@@ -191,7 +191,6 @@ module DiscourseTopicGallery
             width: upload.width,
             height: upload.height,
             filesize: upload.human_filesize,
-            filename: upload.original_filename,
             downloadUrl: upload.short_path,
             username: post_users[ref.post_user_id]&.username,
             postId: ref.post_id,
