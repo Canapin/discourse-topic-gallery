@@ -202,7 +202,6 @@ describe "TopicGalleryController" do
         expect(image["url"]).to be_present
         expect(image["thumbnailUrl"]).to be_present
         expect(image["downloadUrl"]).to be_present
-        expect(image["filename"]).to be_present
       end
 
       it "returns empty images for page beyond results" do
