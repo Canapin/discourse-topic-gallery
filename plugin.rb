@@ -33,7 +33,30 @@ after_initialize do
   # Inject gallery-specific title and description for gallery pages
   register_modifier(:meta_data_content) do |content, property, opts|
     url = opts[:url]
-    if url&.match?(%r{\A/gallery/})
+    if url == "/gallery"
+      case property
+      when :title
+        next I18n.t("discourse_topic_gallery.site_gallery_title") + " - " + SiteSetting.title
+      when :description
+        next I18n.t("discourse_topic_gallery.site_gallery_description")
+      end
+    elsif url&.match?(%r{\A/gallery/c/})
+      category_id = url.match(%r{/(\d+)(?:\?|$)})&.[](1)
+      if category_id
+        category = Category.find_by(id: category_id)
+        if category
+          case property
+          when :title
+            next(
+              I18n.t("js.discourse_topic_gallery.page_title", title: category.name) + " - " +
+                SiteSetting.title
+            )
+          when :description
+            next I18n.t("discourse_topic_gallery.category_gallery_description", title: category.name)
+          end
+        end
+      end
+    elsif url&.match?(%r{\A/gallery/})
       topic_id = url.match(%r{/(\d+)(?:\?|$)})&.[](1)
       if topic_id
         topic = Topic.find_by(id: topic_id)
@@ -56,15 +79,64 @@ after_initialize do
   # All routes use /gallery/ prefix — no conflict with Discourse's /t/ catch-all,
   # so no need to prepend. HTML routes serve the Ember app shell; JSON routes
   # return gallery data.
+  Discourse::Application.routes.prepend do
+    constraints(->(req) { !req.path.end_with?(".json") }) do
+      get "c/*category_slug_path/:category_id/gallery" =>
+            "discourse_topic_gallery/topic_gallery#page",
+          :constraints => {
+            category_id: /\d+/,
+          },
+          :defaults => {
+            gallery_scope: "category",
+          }
+    end
+
+    get "c/*category_slug_path/:category_id/gallery" =>
+          "discourse_topic_gallery/topic_gallery#show",
+        :constraints => {
+          category_id: /\d+/,
+        },
+        :defaults => {
+          format: :json,
+          gallery_scope: "category",
+        }
+  end
+
   Discourse::Application.routes.append do
-    scope constraints: { topic_id: /\d+/ } do
-      # HTML routes (Ember app shell)
-      constraints(->(req) { !req.path.end_with?(".json") }) do
+    # HTML routes (Ember app shell)
+    constraints(->(req) { !req.path.end_with?(".json") }) do
+      get "gallery" => "discourse_topic_gallery/topic_gallery#page",
+          :defaults => {
+            gallery_scope: "site",
+          }
+      get "gallery/c/:category_slug/:category_id" => "discourse_topic_gallery/topic_gallery#page",
+          :constraints => {
+            category_id: /\d+/,
+          },
+          :defaults => {
+            gallery_scope: "category",
+          }
+      scope constraints: { topic_id: /\d+/ } do
         get "gallery/:slug/:topic_id" => "discourse_topic_gallery/topic_gallery#page"
         get "gallery/:topic_id" => "discourse_topic_gallery/topic_gallery#page"
       end
+    end
 
-      # JSON routes (gallery data) - support both URL formats
+    # JSON routes (gallery data)
+    get "gallery" => "discourse_topic_gallery/topic_gallery#show",
+        :defaults => {
+          format: :json,
+          gallery_scope: "site",
+        }
+    get "gallery/c/:category_slug/:category_id" => "discourse_topic_gallery/topic_gallery#show",
+        :constraints => {
+          category_id: /\d+/,
+        },
+        :defaults => {
+          format: :json,
+          gallery_scope: "category",
+        }
+    scope constraints: { topic_id: /\d+/ } do
       get "gallery/:slug/:topic_id" => "discourse_topic_gallery/topic_gallery#show",
           :defaults => {
             format: :json,
