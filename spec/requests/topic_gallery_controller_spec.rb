@@ -33,9 +33,17 @@ describe "TopicGalleryController" do
     end
 
     context "with group-based access control" do
-      it "allows anonymous users when everyone group is allowed" do
+      it "allows anonymous users when the anonymous_users pseudogroup is allowed" do
+        SiteSetting.topic_gallery_allowed_groups = Group::AUTO_GROUPS[:anonymous_users].to_s
         get "/topic-gallery/#{topic.id}.json"
         expect(response.status).to eq(200)
+      end
+
+      it "does not allow anonymous users when only the everyone pseudogroup is allowed" do
+        SiteSetting.granular_anonymous_and_logged_in_groups_permissions = true
+        SiteSetting.topic_gallery_allowed_groups = Group::AUTO_GROUPS[:everyone].to_s
+        get "/topic-gallery/#{topic.id}.json"
+        expect(response.status).to eq(404)
       end
 
       it "returns 404 when user is not in allowed group" do

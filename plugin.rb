@@ -22,12 +22,7 @@ after_initialize do
 
   # Expose gallery permission to the client so the UI can show/hide the button
   add_to_serializer(:site, :can_view_topic_gallery) do
-    allowed = SiteSetting.topic_gallery_allowed_groups_map
-    if scope.user
-      scope.user.in_any_groups?(allowed)
-    else
-      allowed.include?(Group::AUTO_GROUPS[:everyone])
-    end
+    scope.in_any_groups?(SiteSetting.topic_gallery_allowed_groups_map)
   end
 
   # Inject gallery-specific title and description for gallery pages
