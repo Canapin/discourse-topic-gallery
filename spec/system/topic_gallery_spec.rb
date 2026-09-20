@@ -8,7 +8,7 @@ describe "Topic Gallery", type: :system do
 
   before do
     SiteSetting.topic_gallery_enabled = true
-    SiteSetting.topic_gallery_allowed_groups = Group::AUTO_GROUPS[:everyone]
+    SiteSetting.topic_gallery_allowed_groups = Group::AUTO_GROUPS[:logged_in_users]
   end
 
   it "displays the topic title on the gallery page" do

@@ -16,7 +16,7 @@ describe "TopicGalleryController" do
 
   before do
     SiteSetting.topic_gallery_enabled = true
-    SiteSetting.topic_gallery_allowed_groups = Group::AUTO_GROUPS[:everyone]
+    SiteSetting.topic_gallery_allowed_groups = Group::AUTO_GROUPS[:logged_in_users]
     UploadReference.create!(target: post1, upload: upload1)
     UploadReference.create!(target: post2, upload: upload2)
   end
@@ -39,9 +39,8 @@ describe "TopicGalleryController" do
         expect(response.status).to eq(200)
       end
 
-      it "does not allow anonymous users when only the everyone pseudogroup is allowed" do
-        SiteSetting.granular_anonymous_and_logged_in_groups_permissions = true
-        SiteSetting.topic_gallery_allowed_groups = Group::AUTO_GROUPS[:everyone].to_s
+      it "does not allow anonymous users when only the logged_in_users pseudogroup is allowed" do
+        SiteSetting.topic_gallery_allowed_groups = Group::AUTO_GROUPS[:logged_in_users].to_s
         get "/topic-gallery/#{topic.id}.json"
         expect(response.status).to eq(404)
       end
